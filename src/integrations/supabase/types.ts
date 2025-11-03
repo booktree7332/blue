@@ -19,6 +19,8 @@ export type Database = {
           created_at: string
           description: string | null
           due_date: string | null
+          file_type: string | null
+          file_url: string | null
           id: string
           instructor_id: string
           title: string
@@ -28,6 +30,8 @@ export type Database = {
           created_at?: string
           description?: string | null
           due_date?: string | null
+          file_type?: string | null
+          file_url?: string | null
           id?: string
           instructor_id: string
           title: string
@@ -37,6 +41,8 @@ export type Database = {
           created_at?: string
           description?: string | null
           due_date?: string | null
+          file_type?: string | null
+          file_url?: string | null
           id?: string
           instructor_id?: string
           title?: string
@@ -84,6 +90,7 @@ export type Database = {
           assignment_id: string
           correct_answer: number
           created_at: string
+          explanation: string | null
           id: string
           options: Json
           order_number: number
@@ -93,6 +100,7 @@ export type Database = {
           assignment_id: string
           correct_answer: number
           created_at?: string
+          explanation?: string | null
           id?: string
           options: Json
           order_number: number
@@ -102,6 +110,7 @@ export type Database = {
           assignment_id?: string
           correct_answer?: number
           created_at?: string
+          explanation?: string | null
           id?: string
           options?: Json
           order_number?: number

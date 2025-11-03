@@ -12,12 +12,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface Question {
   id: string;
   text: string;
   options: string[];
   correct_answer: number;
+  explanation: string | null;
   order_number: number;
 }
 
@@ -316,7 +318,7 @@ const Student = () => {
 
     return (
       <div className="min-h-screen bg-background p-6">
-        <div className="max-w-3xl mx-auto space-y-6">
+        <div className="max-w-4xl mx-auto space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="text-center">Assignment Complete!</CardTitle>
@@ -331,18 +333,99 @@ const Student = () => {
                   <p className="text-xl text-muted-foreground">{percentage}%</p>
                 </div>
               </div>
-
-              <Button
-                onClick={() => {
-                  setShowResults(false);
-                  setCurrentAssignment(null);
-                }}
-                className="w-full"
-              >
-                Back to Assignments
-              </Button>
             </CardContent>
           </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Review Your Answers</CardTitle>
+              <CardDescription>
+                See which questions you got right and learn from explanations
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {currentAssignment.questions.map((question, index) => {
+                const selectedAnswer = selectedAnswers[index];
+                const isCorrect = selectedAnswer === question.correct_answer;
+
+                return (
+                  <Card key={question.id} className={cn(
+                    "border-2",
+                    isCorrect ? "border-green-500/50" : "border-destructive/50"
+                  )}>
+                    <CardHeader>
+                      <div className="flex items-start gap-2">
+                        {isCorrect ? (
+                          <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
+                        ) : (
+                          <div className="h-5 w-5 rounded-full bg-destructive flex items-center justify-center mt-0.5">
+                            <span className="text-xs text-destructive-foreground">✕</span>
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          <CardTitle className="text-base">Question {index + 1}</CardTitle>
+                          <p className="text-sm text-muted-foreground mt-1">{question.text}</p>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="space-y-2">
+                        {question.options.map((option, optIndex) => {
+                          const isSelected = selectedAnswer === optIndex;
+                          const isCorrectOption = optIndex === question.correct_answer;
+
+                          return (
+                            <div
+                              key={optIndex}
+                              className={cn(
+                                "p-3 rounded-lg border",
+                                isCorrectOption && "bg-green-500/10 border-green-500",
+                                isSelected && !isCorrect && "bg-destructive/10 border-destructive"
+                              )}
+                            >
+                              <div className="flex items-center gap-2">
+                                {isCorrectOption && (
+                                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                                )}
+                                {isSelected && !isCorrect && (
+                                  <div className="h-4 w-4 rounded-full bg-destructive flex items-center justify-center">
+                                    <span className="text-xs text-destructive-foreground">✕</span>
+                                  </div>
+                                )}
+                                <span className={cn(
+                                  isCorrectOption && "font-semibold",
+                                  isSelected && !isCorrect && "line-through"
+                                )}>
+                                  {option}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {question.explanation && (
+                        <div className="mt-4 p-4 bg-muted rounded-lg">
+                          <p className="text-sm font-semibold mb-1">Explanation:</p>
+                          <p className="text-sm text-muted-foreground">{question.explanation}</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </CardContent>
+          </Card>
+
+          <Button
+            onClick={() => {
+              setShowResults(false);
+              setCurrentAssignment(null);
+            }}
+            className="w-full"
+          >
+            Back to Assignments
+          </Button>
         </div>
       </div>
     );

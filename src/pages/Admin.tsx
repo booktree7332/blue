@@ -6,7 +6,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Loader2, Trash2, LogOut, Plus, CalendarIcon, BarChart3 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowLeft, Loader2, Trash2, LogOut, Plus, CalendarIcon, BarChart3, Upload, FileText, Image } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
@@ -72,6 +73,7 @@ interface QuestionForm {
   text: string;
   options: string[];
   correctAnswer: number;
+  explanation: string;
 }
 
 interface Instructor {
@@ -96,8 +98,10 @@ const Admin = () => {
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState<Date>();
   const [questions, setQuestions] = useState<QuestionForm[]>([
-    { text: "", options: ["", "", "", ""], correctAnswer: 0 },
+    { text: "", options: ["", "", "", ""], correctAnswer: 0, explanation: "" },
   ]);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const fetchUsers = async () => {
@@ -173,12 +177,19 @@ const Admin = () => {
     try {
       const { data: roles, error: rolesError } = await supabase
         .from("user_roles")
-        .select("user_id")
-        .eq("role", "instructor");
+        .select("user_id, role");
 
       if (rolesError) throw rolesError;
 
-      const instructorIds = roles.map(r => r.user_id);
+      const instructorIds = roles
+        .filter(r => r.role === "instructor")
+        .map(r => r.user_id);
+
+      // Check if current user (admin) is also an instructor
+      const { data: { user } } = await supabase.auth.getUser();
+      const currentUserIsInstructor = user && roles.some(
+        r => r.user_id === user.id && r.role === "instructor"
+      );
 
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
@@ -294,7 +305,33 @@ const Admin = () => {
 
   // Create Assignment Functions
   const addQuestion = () => {
-    setQuestions([...questions, { text: "", options: ["", "", "", ""], correctAnswer: 0 }]);
+    setQuestions([...questions, { text: "", options: ["", "", "", ""], correctAnswer: 0, explanation: "" }]);
+  };
+
+  const handleFileUpload = async (file: File): Promise<string | null> => {
+    try {
+      setUploading(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('assignment-files')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('assignment-files')
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error: any) {
+      toast.error("Failed to upload file: " + error.message);
+      return null;
+    } finally {
+      setUploading(false);
+    }
   };
 
   const removeQuestion = (index: number) => {
@@ -359,6 +396,7 @@ const Admin = () => {
         text: q.text,
         options: q.options,
         correct_answer: q.correctAnswer,
+        explanation: q.explanation || null,
         order_number: index,
       }));
 
@@ -373,7 +411,8 @@ const Admin = () => {
       setAssignmentTitle("");
       setDescription("");
       setDueDate(undefined);
-      setQuestions([{ text: "", options: ["", "", "", ""], correctAnswer: 0 }]);
+      setUploadedFile(null);
+      setQuestions([{ text: "", options: ["", "", "", ""], correctAnswer: 0, explanation: "" }]);
       fetchAssignments();
     } catch (error: any) {
       toast.error("Failed to create assignment: " + error.message);
@@ -709,10 +748,41 @@ const Admin = () => {
                           className="pointer-events-auto"
                         />
                       </PopoverContent>
-                    </Popover>
-                  </div>
+                  </Popover>
+                </div>
 
-                  <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="file">Upload File (Optional)</Label>
+                  <div className="flex gap-2 items-center">
+                    <Input
+                      id="file"
+                      type="file"
+                      accept="image/*,.pdf"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setUploadedFile(file);
+                        }
+                      }}
+                      disabled={uploading}
+                    />
+                    {uploadedFile && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        {uploadedFile.type.startsWith('image/') ? (
+                          <Image className="h-4 w-4" />
+                        ) : (
+                          <FileText className="h-4 w-4" />
+                        )}
+                        <span>{uploadedFile.name}</span>
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Upload an image or PDF file to attach to this assignment
+                  </p>
+                </div>
+
+                <div className="space-y-4">
                     <Label>Questions</Label>
                     {questions.map((question, qIndex) => (
                       <Card key={qIndex}>
@@ -756,9 +826,20 @@ const Admin = () => {
                                   className="flex-1"
                                 />
                               </div>
-                            ))}
-                          </RadioGroup>
-                        </CardContent>
+                          ))}
+                        </RadioGroup>
+
+                        <div className="space-y-2">
+                          <Label htmlFor={`explanation-${qIndex}`}>Explanation (Optional)</Label>
+                          <Textarea
+                            id={`explanation-${qIndex}`}
+                            placeholder="Explain why this answer is correct..."
+                            value={question.explanation}
+                            onChange={(e) => updateQuestion(qIndex, "explanation", e.target.value)}
+                            rows={3}
+                          />
+                        </div>
+                      </CardContent>
                       </Card>
                     ))}
 
