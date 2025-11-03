@@ -280,7 +280,7 @@ const Instructor = () => {
 
   return (
     <div className="min-h-screen bg-background p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
             <ArrowLeft className="h-5 w-5" />
@@ -295,216 +295,229 @@ const Instructor = () => {
           </TabsList>
 
           <TabsContent value="create">
-            <Card>
-              <CardHeader>
-                <CardTitle>Create New Assignment</CardTitle>
-                <CardDescription>Add questions and set a due date for your assignment</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="title">Assignment Title</Label>
-                  <Input
-                    id="title"
-                    placeholder="Enter assignment title"
-                    value={assignmentTitle}
-                    onChange={(e) => setAssignmentTitle(e.target.value)}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description (Optional)</Label>
-                  <Input
-                    id="description"
-                    placeholder="Enter assignment description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Due Date (Optional)</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !dueDate && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dueDate ? format(dueDate, "PPP") : "Pick a date"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={dueDate}
-                        onSelect={setDueDate}
-                        initialFocus
-                        className="pointer-events-auto"
+            <div className="grid lg:grid-cols-2 gap-6">
+              {/* Left Column - Assignment Details */}
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Assignment Details</CardTitle>
+                    <CardDescription>Set up basic information for your assignment</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="title">Assignment Title</Label>
+                      <Input
+                        id="title"
+                        placeholder="Enter assignment title"
+                        value={assignmentTitle}
+                        onChange={(e) => setAssignmentTitle(e.target.value)}
                       />
-                    </PopoverContent>
-                </Popover>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="file">Upload File (Optional)</Label>
-                <div className="flex gap-2 items-center">
-                  <Input
-                    id="file"
-                    type="file"
-                    accept="image/*,.pdf"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        setUploadedFile(file);
-                      }
-                    }}
-                    disabled={uploading}
-                  />
-                  {uploadedFile && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      {uploadedFile.type.startsWith('image/') ? (
-                        <Image className="h-4 w-4" />
-                      ) : (
-                        <FileText className="h-4 w-4" />
-                      )}
-                      <span>{uploadedFile.name}</span>
                     </div>
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Upload an image or PDF file to attach to this assignment
-                </p>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="description">Description (Optional)</Label>
+                      <Input
+                        id="description"
+                        placeholder="Enter assignment description"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Due Date (Optional)</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-start text-left font-normal",
+                              !dueDate && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {dueDate ? format(dueDate, "PPP") : "Pick a date"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={dueDate}
+                            onSelect={setDueDate}
+                            initialFocus
+                            className="pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="file">Upload File (Optional)</Label>
+                      <div className="flex gap-2 items-center">
+                        <Input
+                          id="file"
+                          type="file"
+                          accept="image/*,.pdf"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setUploadedFile(file);
+                            }
+                          }}
+                          disabled={uploading}
+                        />
+                        {uploadedFile && (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            {uploadedFile.type.startsWith('image/') ? (
+                              <Image className="h-4 w-4" />
+                            ) : (
+                              <FileText className="h-4 w-4" />
+                            )}
+                            <span>{uploadedFile.name}</span>
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Upload an image or PDF file to attach to this assignment
+                      </p>
+                    </div>
+
+                    <Button onClick={handleSubmit} className="w-full" disabled={submitting}>
+                      {submitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Creating...
+                        </>
+                      ) : (
+                        "Create Assignment"
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
               </div>
 
-              <div className="space-y-4">
-                  <Label>Questions</Label>
-                  <div className="grid grid-cols-5 gap-4">
-                    {questions.map((question, qIndex) => (
-                      <Card 
-                        key={qIndex} 
-                        className="aspect-square flex flex-col border-2 hover:border-accent transition-colors cursor-pointer"
-                        onClick={() => {
-                          const element = document.getElementById(`question-form-${qIndex}`);
-                          element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }}
-                      >
-                        <CardHeader className="flex-1 flex items-center justify-center p-4">
-                          <CardTitle className="text-center">
-                            Question {qIndex + 1}
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-4 pt-0">
-                          {question.text && (
-                            <p className="text-xs text-muted-foreground text-center line-clamp-2">
-                              {question.text}
-                            </p>
-                          )}
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-
-                  <div className="space-y-6 mt-8">
-                    {questions.map((question, qIndex) => (
-                      <Card key={qIndex} id={`question-form-${qIndex}`} className="border-2">
-                        <CardHeader>
-                          <div className="flex items-center justify-between">
-                            <CardTitle>Question {qIndex + 1}</CardTitle>
-                            {questions.length > 1 && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => removeQuestion(qIndex)}
-                              >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Remove
-                              </Button>
+              {/* Right Column - Questions */}
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Questions</CardTitle>
+                    <CardDescription>Add and configure questions for your assignment</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="grid grid-cols-3 gap-4">
+                      {questions.map((question, qIndex) => (
+                        <Card 
+                          key={qIndex} 
+                          className="aspect-square flex flex-col border-2 hover:border-accent transition-colors cursor-pointer"
+                          onClick={() => {
+                            const element = document.getElementById(`question-form-${qIndex}`);
+                            element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                          }}
+                        >
+                          <CardHeader className="flex-1 flex items-center justify-center p-4">
+                            <CardTitle className="text-center text-sm">
+                              Question {qIndex + 1}
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="p-4 pt-0">
+                            {question.text && (
+                              <p className="text-xs text-muted-foreground text-center line-clamp-2">
+                                {question.text}
+                              </p>
                             )}
-                          </div>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div className="space-y-2">
-                            <Label>Question Text</Label>
-                            <Input
-                              placeholder="Enter question text"
-                              value={question.text}
-                              onChange={(e) => updateQuestion(qIndex, "text", e.target.value)}
-                            />
-                          </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
 
-                          <div className="space-y-3">
-                            <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-md">
-                              <Info className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0" />
-                              <Label className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                                Click the radio button to mark the correct answer
-                              </Label>
+                    <div className="space-y-6">
+                      {questions.map((question, qIndex) => (
+                        <Card key={qIndex} id={`question-form-${qIndex}`} className="border-2">
+                          <CardHeader>
+                            <div className="flex items-center justify-between">
+                              <CardTitle>Question {qIndex + 1}</CardTitle>
+                              {questions.length > 1 && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeQuestion(qIndex)}
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Remove
+                                </Button>
+                              )}
                             </div>
-                            <RadioGroup
-                              value={question.correctAnswer.toString()}
-                              onValueChange={(value) =>
-                                updateQuestion(qIndex, "correctAnswer", parseInt(value))
-                              }
-                            >
-                              {question.options.map((option, oIndex) => (
-                                <div key={oIndex} className="flex items-center gap-2">
-                                  <RadioGroupItem
-                                    value={oIndex.toString()}
-                                    id={`q${qIndex}-o${oIndex}`}
-                                    className="shrink-0"
-                                  />
-                                  <div className="flex-1">
-                                    <Input
-                                      placeholder={`Option ${oIndex + 1}`}
-                                      value={option}
-                                      onChange={(e) => updateOption(qIndex, oIndex, e.target.value)}
+                          </CardHeader>
+                          <CardContent className="space-y-4">
+                            <div className="space-y-2">
+                              <Label>Question Text</Label>
+                              <Input
+                                placeholder="Enter question text"
+                                value={question.text}
+                                onChange={(e) => updateQuestion(qIndex, "text", e.target.value)}
+                              />
+                            </div>
+
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-md">
+                                <Info className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                                <Label className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                                  Click the radio button to mark the correct answer
+                                </Label>
+                              </div>
+                              <RadioGroup
+                                value={question.correctAnswer.toString()}
+                                onValueChange={(value) =>
+                                  updateQuestion(qIndex, "correctAnswer", parseInt(value))
+                                }
+                              >
+                                {question.options.map((option, oIndex) => (
+                                  <div key={oIndex} className="flex items-center gap-2">
+                                    <RadioGroupItem
+                                      value={oIndex.toString()}
+                                      id={`q${qIndex}-o${oIndex}`}
+                                      className="shrink-0"
                                     />
+                                    <div className="flex-1">
+                                      <Input
+                                        placeholder={`Option ${oIndex + 1}`}
+                                        value={option}
+                                        onChange={(e) => updateOption(qIndex, oIndex, e.target.value)}
+                                      />
+                                    </div>
+                                    {question.correctAnswer === oIndex && (
+                                      <span className="text-xs text-green-600 dark:text-green-400 font-medium shrink-0">
+                                        ✓ Correct
+                                      </span>
+                                    )}
                                   </div>
-                                  {question.correctAnswer === oIndex && (
-                                    <span className="text-xs text-green-600 dark:text-green-400 font-medium shrink-0">
-                                      ✓ Correct
-                                    </span>
-                                  )}
-                                </div>
-                              ))}
-                            </RadioGroup>
-                          </div>
+                                ))}
+                              </RadioGroup>
+                            </div>
 
-                          <div className="space-y-2">
-                            <Label htmlFor={`explanation-${qIndex}`}>Explanation (Optional)</Label>
-                            <Textarea
-                              id={`explanation-${qIndex}`}
-                              placeholder="Explain why this answer is correct..."
-                              value={question.explanation}
-                              onChange={(e) => updateQuestion(qIndex, "explanation", e.target.value)}
-                              rows={3}
-                            />
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+                            <div className="space-y-2">
+                              <Label htmlFor={`explanation-${qIndex}`}>Explanation (Optional)</Label>
+                              <Textarea
+                                id={`explanation-${qIndex}`}
+                                placeholder="Explain why this answer is correct..."
+                                value={question.explanation}
+                                onChange={(e) => updateQuestion(qIndex, "explanation", e.target.value)}
+                                rows={3}
+                              />
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
 
-                  <Button onClick={addQuestion} variant="outline" className="w-full">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Question
-                  </Button>
-                </div>
-
-                <Button onClick={handleSubmit} className="w-full" disabled={submitting}>
-                  {submitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating...
-                    </>
-                  ) : (
-                    "Create Assignment"
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
+                    <Button onClick={addQuestion} variant="outline" className="w-full">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Question
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="assignments">
