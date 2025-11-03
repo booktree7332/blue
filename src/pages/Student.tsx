@@ -300,7 +300,7 @@ const Student = () => {
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-6">
-        <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
+        <div className="max-w-7xl mx-auto space-y-6 animate-fade-in">
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
@@ -330,115 +330,121 @@ const Student = () => {
             </div>
           </div>
 
-          {currentAssignment.file_url && (
-            <Card className="shadow-lg border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Paperclip className="h-5 w-5" color="#474747" />
-                  Assignment Reference Material
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {currentAssignment.file_type?.startsWith('image/') ? (
-                  <div className="space-y-2">
-                    <img 
-                      src={currentAssignment.file_url} 
-                      alt="Assignment reference" 
-                      className="w-full rounded-lg border shadow-md max-h-96 object-contain"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-full h-[600px] border rounded-lg overflow-hidden">
-                    <iframe
-                      src={currentAssignment.file_url!}
-                      className="w-full h-full"
-                      title="Assignment Reference Material"
-                    />
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          <Card className="shadow-xl border-2 hover:shadow-2xl transition-all duration-300 animate-scale-in">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-xl leading-relaxed">{currentQuestion.text}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <RadioGroup
-                value={selectedAnswers[currentQuestionIndex]?.toString() || ""}
-                onValueChange={(value) => handleAnswerSelect(parseInt(value))}
-              >
-                <div className="space-y-3">
-                  {currentQuestion.options.map((option, index) => {
-                    const isSelected = selectedAnswers[currentQuestionIndex] === index;
-                    return (
-                      <div
-                        key={index}
-                        className={cn(
-                          "flex items-center space-x-3 p-4 rounded-lg border-2 cursor-pointer transition-all duration-200",
-                          "hover:scale-[1.02] hover:shadow-md",
-                          isSelected 
-                            ? "bg-accent/50 border-primary shadow-md scale-[1.02]" 
-                            : "border-border hover:border-accent"
-                        )}
-                      >
-                        <RadioGroupItem value={index.toString()} id={`option-${index}`} />
-                        <Label
-                          htmlFor={`option-${index}`}
-                          className={cn(
-                            "flex-1 cursor-pointer text-base transition-colors",
-                            isSelected && "font-medium text-foreground"
-                          )}
-                        >
-                          {option}
-                        </Label>
-                      </div>
-                    );
-                  })}
-                </div>
-              </RadioGroup>
-            </CardContent>
-          </Card>
-
-          <div className="flex justify-between gap-4">
-            <Button
-              variant="outline"
-              onClick={handlePrevious}
-              disabled={currentQuestionIndex === 0}
-              className="hover:scale-105 transition-transform shadow-md"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Previous
-            </Button>
-
-            {currentQuestionIndex === currentAssignment.questions.length - 1 ? (
-              <Button 
-                onClick={handleSubmit} 
-                disabled={submitting}
-                className="hover:scale-105 transition-transform shadow-lg hover:shadow-xl bg-gradient-to-r from-primary to-primary/90"
-              >
-                {submitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Submitting...
-                  </>
-                ) : (
-                  <>
-                    Submit Assignment
-                    <CheckCircle2 className="ml-2 h-4 w-4" />
-                  </>
-                )}
-              </Button>
-            ) : (
-              <Button 
-                onClick={handleNext}
-                className="hover:scale-105 transition-transform shadow-md"
-              >
-                Next
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Left: Preview */}
+            {currentAssignment.file_url && (
+              <Card className="shadow-lg border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Paperclip className="h-5 w-5" color="#474747" />
+                    Assignment Reference Material
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {currentAssignment.file_type?.startsWith('image/') ? (
+                    <div className="space-y-2">
+                      <img 
+                        src={currentAssignment.file_url} 
+                        alt="Assignment reference" 
+                        className="w-full rounded-lg border shadow-md max-h-[600px] object-contain"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-full h-[600px] border rounded-lg overflow-hidden">
+                      <iframe
+                        src={currentAssignment.file_url!}
+                        className="w-full h-full"
+                        title="Assignment Reference Material"
+                      />
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             )}
+
+            {/* Right: Marking Interface */}
+            <div className="space-y-6">
+              <Card className="shadow-xl border-2 hover:shadow-2xl transition-all duration-300 animate-scale-in">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-xl leading-relaxed">{currentQuestion.text}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <RadioGroup
+                    value={selectedAnswers[currentQuestionIndex]?.toString() || ""}
+                    onValueChange={(value) => handleAnswerSelect(parseInt(value))}
+                  >
+                    <div className="space-y-3">
+                      {currentQuestion.options.map((option, index) => {
+                        const isSelected = selectedAnswers[currentQuestionIndex] === index;
+                        return (
+                          <div
+                            key={index}
+                            className={cn(
+                              "flex items-center space-x-3 p-4 rounded-lg border-2 cursor-pointer transition-all duration-200",
+                              "hover:scale-[1.02] hover:shadow-md",
+                              isSelected 
+                                ? "bg-accent/50 border-primary shadow-md scale-[1.02]" 
+                                : "border-border hover:border-accent"
+                            )}
+                          >
+                            <RadioGroupItem value={index.toString()} id={`option-${index}`} />
+                            <Label
+                              htmlFor={`option-${index}`}
+                              className={cn(
+                                "flex-1 cursor-pointer text-base transition-colors",
+                                isSelected && "font-medium text-foreground"
+                              )}
+                            >
+                              {option}
+                            </Label>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </RadioGroup>
+                </CardContent>
+              </Card>
+
+              <div className="flex justify-between gap-4">
+                <Button
+                  variant="outline"
+                  onClick={handlePrevious}
+                  disabled={currentQuestionIndex === 0}
+                  className="hover:scale-105 transition-transform shadow-md"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Previous
+                </Button>
+
+                {currentQuestionIndex === currentAssignment.questions.length - 1 ? (
+                  <Button 
+                    onClick={handleSubmit} 
+                    disabled={submitting}
+                    className="hover:scale-105 transition-transform shadow-lg hover:shadow-xl bg-gradient-to-r from-primary to-primary/90"
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Submitting...
+                      </>
+                    ) : (
+                      <>
+                        Submit Assignment
+                        <CheckCircle2 className="ml-2 h-4 w-4" />
+                      </>
+                    )}
+                  </Button>
+                ) : (
+                  <Button 
+                    onClick={handleNext}
+                    className="hover:scale-105 transition-transform shadow-md"
+                  >
+                    Next
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
