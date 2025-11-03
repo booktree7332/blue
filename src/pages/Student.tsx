@@ -603,7 +603,7 @@ const Student = () => {
                             <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                               <span className="flex items-center gap-1">
                                 <User className="h-3 w-3" />
-                                {assignment.instructor.full_name}
+                                {assignment.instructor?.full_name || "Unknown Instructor"}
                               </span>
                               {assignment.due_date && (
                                 <span className={cn(
