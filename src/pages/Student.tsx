@@ -11,7 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, BookOpen, ClipboardList, Award, Calendar, User, Clock, FileText, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Question {
@@ -228,8 +228,11 @@ const Student = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-muted/20">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
+          <p className="text-muted-foreground animate-pulse">Loading your assignments...</p>
+        </div>
       </div>
     );
   }
@@ -240,34 +243,40 @@ const Student = () => {
       ((currentQuestionIndex + 1) / currentAssignment.questions.length) * 100;
 
     return (
-      <div className="min-h-screen bg-background p-6">
-        <div className="max-w-3xl mx-auto space-y-6">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-6">
+        <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setCurrentAssignment(null)}
+              className="hover:scale-110 transition-transform"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <h1 className="text-2xl font-bold">{currentAssignment.title}</h1>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+              {currentAssignment.title}
+            </h1>
             <div className="w-10" />
           </div>
 
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm text-muted-foreground">
-              <span>
+          <div className="space-y-3">
+            <div className="flex justify-between text-sm font-medium">
+              <span className="text-muted-foreground">
                 Question {currentQuestionIndex + 1} of{" "}
                 {currentAssignment.questions.length}
               </span>
-              <span>{Math.round(progress)}%</span>
+              <span className="text-primary font-semibold">{Math.round(progress)}%</span>
             </div>
-            <Progress value={progress} />
+            <div className="relative">
+              <Progress value={progress} className="h-3 bg-secondary" />
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-full pointer-events-none" />
+            </div>
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>{currentQuestion.text}</CardTitle>
+          <Card className="shadow-xl border-2 hover:shadow-2xl transition-all duration-300 animate-scale-in">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl leading-relaxed">{currentQuestion.text}</CardTitle>
             </CardHeader>
             <CardContent>
               <RadioGroup
@@ -275,48 +284,71 @@ const Student = () => {
                 onValueChange={(value) => handleAnswerSelect(parseInt(value))}
               >
                 <div className="space-y-3">
-                  {currentQuestion.options.map((option, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center space-x-2 p-4 rounded-lg border hover:bg-accent cursor-pointer"
-                    >
-                      <RadioGroupItem value={index.toString()} id={`option-${index}`} />
-                      <Label
-                        htmlFor={`option-${index}`}
-                        className="flex-1 cursor-pointer"
+                  {currentQuestion.options.map((option, index) => {
+                    const isSelected = selectedAnswers[currentQuestionIndex] === index;
+                    return (
+                      <div
+                        key={index}
+                        className={cn(
+                          "flex items-center space-x-3 p-4 rounded-lg border-2 cursor-pointer transition-all duration-200",
+                          "hover:scale-[1.02] hover:shadow-md",
+                          isSelected 
+                            ? "bg-accent/50 border-primary shadow-md scale-[1.02]" 
+                            : "border-border hover:border-accent"
+                        )}
                       >
-                        {option}
-                      </Label>
-                    </div>
-                  ))}
+                        <RadioGroupItem value={index.toString()} id={`option-${index}`} />
+                        <Label
+                          htmlFor={`option-${index}`}
+                          className={cn(
+                            "flex-1 cursor-pointer text-base transition-colors",
+                            isSelected && "font-medium text-foreground"
+                          )}
+                        >
+                          {option}
+                        </Label>
+                      </div>
+                    );
+                  })}
                 </div>
               </RadioGroup>
             </CardContent>
           </Card>
 
-          <div className="flex justify-between">
+          <div className="flex justify-between gap-4">
             <Button
               variant="outline"
               onClick={handlePrevious}
               disabled={currentQuestionIndex === 0}
+              className="hover:scale-105 transition-transform shadow-md"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Previous
             </Button>
 
             {currentQuestionIndex === currentAssignment.questions.length - 1 ? (
-              <Button onClick={handleSubmit} disabled={submitting}>
+              <Button 
+                onClick={handleSubmit} 
+                disabled={submitting}
+                className="hover:scale-105 transition-transform shadow-lg hover:shadow-xl bg-gradient-to-r from-primary to-primary/90"
+              >
                 {submitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Submitting...
                   </>
                 ) : (
-                  "Submit Assignment"
+                  <>
+                    Submit Assignment
+                    <CheckCircle2 className="ml-2 h-4 w-4" />
+                  </>
                 )}
               </Button>
             ) : (
-              <Button onClick={handleNext}>
+              <Button 
+                onClick={handleNext}
+                className="hover:scale-105 transition-transform shadow-md"
+              >
                 Next
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
@@ -332,30 +364,43 @@ const Student = () => {
     const percentage = Math.round(
       (score / currentAssignment.questions.length) * 100
     );
+    const scoreColor = percentage >= 80 ? "text-green-500" : percentage >= 60 ? "text-yellow-500" : "text-red-500";
+    const bgGradient = percentage >= 80 ? "from-green-500/10 to-green-500/5" : percentage >= 60 ? "from-yellow-500/10 to-yellow-500/5" : "from-red-500/10 to-red-500/5";
 
     return (
-      <div className="min-h-screen bg-background p-6">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <Card>
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-6">
+        <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
+          <Card className={cn("shadow-xl border-2 bg-gradient-to-br", bgGradient)}>
             <CardHeader>
-              <CardTitle className="text-center">Assignment Complete!</CardTitle>
+              <CardTitle className="text-center text-3xl">🎉 Assignment Complete! 🎉</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="flex flex-col items-center space-y-4">
-                <CheckCircle2 className="h-16 w-16 text-green-500" />
-                <div className="text-center">
-                  <p className="text-4xl font-bold">
+              <div className="flex flex-col items-center space-y-6">
+                <div className="relative">
+                  <div className="absolute inset-0 blur-2xl opacity-50">
+                    <Award className={cn("h-24 w-24", scoreColor)} />
+                  </div>
+                  <Award className={cn("h-24 w-24 relative animate-scale-in", scoreColor)} />
+                </div>
+                <div className="text-center space-y-2">
+                  <p className={cn("text-6xl font-bold animate-scale-in", scoreColor)}>
                     {score} / {currentAssignment.questions.length}
                   </p>
-                  <p className="text-xl text-muted-foreground">{percentage}%</p>
+                  <p className={cn("text-3xl font-semibold", scoreColor)}>{percentage}%</p>
+                  <p className="text-muted-foreground text-lg">
+                    {percentage >= 80 ? "Excellent work! 🌟" : percentage >= 60 ? "Good job! Keep it up! 💪" : "Keep practicing! 📚"}
+                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="shadow-xl">
             <CardHeader>
-              <CardTitle>Review Your Answers</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Review Your Answers
+              </CardTitle>
               <CardDescription>
                 See which questions you got right and learn from explanations
               </CardDescription>
@@ -367,21 +412,27 @@ const Student = () => {
 
                 return (
                   <Card key={question.id} className={cn(
-                    "border-2",
-                    isCorrect ? "border-green-500/50" : "border-destructive/50"
+                    "border-2 transition-all duration-300 hover:shadow-lg",
+                    isCorrect ? "border-green-500/50 bg-green-500/5" : "border-destructive/50 bg-destructive/5"
                   )}>
                     <CardHeader>
-                      <div className="flex items-start gap-2">
+                      <div className="flex items-start gap-3">
                         {isCorrect ? (
-                          <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
+                          <div className="relative">
+                            <div className="absolute inset-0 blur-lg bg-green-500/30" />
+                            <CheckCircle2 className="h-6 w-6 text-green-500 relative" />
+                          </div>
                         ) : (
-                          <div className="h-5 w-5 rounded-full bg-destructive flex items-center justify-center mt-0.5">
-                            <span className="text-xs text-destructive-foreground">✕</span>
+                          <div className="h-6 w-6 rounded-full bg-destructive flex items-center justify-center">
+                            <span className="text-sm text-destructive-foreground font-bold">✕</span>
                           </div>
                         )}
                         <div className="flex-1">
-                          <CardTitle className="text-base">Question {index + 1}</CardTitle>
-                          <p className="text-sm text-muted-foreground mt-1">{question.text}</p>
+                          <CardTitle className="text-lg flex items-center gap-2">
+                            Question {index + 1}
+                            {isCorrect && <span className="text-xs bg-green-500/20 text-green-700 dark:text-green-300 px-2 py-1 rounded-full">Correct</span>}
+                          </CardTitle>
+                          <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{question.text}</p>
                         </div>
                       </div>
                     </CardHeader>
@@ -395,23 +446,24 @@ const Student = () => {
                             <div
                               key={optIndex}
                               className={cn(
-                                "p-3 rounded-lg border",
-                                isCorrectOption && "bg-green-500/10 border-green-500",
-                                isSelected && !isCorrect && "bg-destructive/10 border-destructive"
+                                "p-4 rounded-lg border-2 transition-all duration-200",
+                                isCorrectOption && "bg-green-500/15 border-green-500 shadow-sm",
+                                isSelected && !isCorrect && "bg-destructive/15 border-destructive"
                               )}
                             >
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-3">
                                 {isCorrectOption && (
-                                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                                  <CheckCircle2 className="h-5 w-5 text-green-500" />
                                 )}
                                 {isSelected && !isCorrect && (
-                                  <div className="h-4 w-4 rounded-full bg-destructive flex items-center justify-center">
-                                    <span className="text-xs text-destructive-foreground">✕</span>
+                                  <div className="h-5 w-5 rounded-full bg-destructive flex items-center justify-center">
+                                    <span className="text-xs text-destructive-foreground font-bold">✕</span>
                                   </div>
                                 )}
                                 <span className={cn(
-                                  isCorrectOption && "font-semibold",
-                                  isSelected && !isCorrect && "line-through"
+                                  "text-base",
+                                  isCorrectOption && "font-semibold text-green-700 dark:text-green-300",
+                                  isSelected && !isCorrect && "line-through opacity-60"
                                 )}>
                                   {option}
                                 </span>
@@ -422,9 +474,12 @@ const Student = () => {
                       </div>
 
                       {question.explanation && (
-                        <div className="mt-4 p-4 bg-muted rounded-lg">
-                          <p className="text-sm font-semibold mb-1">Explanation:</p>
-                          <p className="text-sm text-muted-foreground">{question.explanation}</p>
+                        <div className="mt-4 p-4 bg-gradient-to-r from-muted to-muted/50 rounded-lg border-l-4 border-primary">
+                          <p className="text-sm font-semibold mb-2 flex items-center gap-2">
+                            <BookOpen className="h-4 w-4" />
+                            Explanation:
+                          </p>
+                          <p className="text-sm text-muted-foreground leading-relaxed">{question.explanation}</p>
                         </div>
                       )}
                     </CardContent>
@@ -439,8 +494,9 @@ const Student = () => {
               setShowResults(false);
               setCurrentAssignment(null);
             }}
-            className="w-full"
+            className="w-full h-12 text-base shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all"
           >
+            <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Assignments
           </Button>
         </div>
@@ -448,117 +504,228 @@ const Student = () => {
     );
   }
 
+  const getRelativeTime = (date: string) => {
+    const now = new Date();
+    const past = new Date(date);
+    const diffInDays = Math.floor((now.getTime() - past.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (diffInDays === 0) return "Today";
+    if (diffInDays === 1) return "Yesterday";
+    if (diffInDays < 7) return `${diffInDays} days ago`;
+    if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} weeks ago`;
+    return past.toLocaleDateString();
+  };
+
+  const isDueSoon = (dueDate: string | null) => {
+    if (!dueDate) return false;
+    const now = new Date();
+    const due = new Date(dueDate);
+    const diffInDays = Math.floor((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    return diffInDays <= 3 && diffInDays >= 0;
+  };
+
+  const isOverdue = (dueDate: string | null) => {
+    if (!dueDate) return false;
+    return new Date(dueDate) < new Date();
+  };
+
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-6">
+      <div className="max-w-6xl mx-auto space-y-6 animate-fade-in">
+        {/* Header */}
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => navigate("/")}
+            className="hover:scale-110 transition-transform"
+          >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-3xl font-bold">Student Portal</h1>
+          <div className="flex-1">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+              Student Portal
+            </h1>
+            <p className="text-muted-foreground mt-1">Welcome back! Ready to learn?</p>
+          </div>
         </div>
 
-        <Tabs defaultValue="assignments" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="assignments">Available Assignments</TabsTrigger>
-            <TabsTrigger value="submissions">My Submissions</TabsTrigger>
+        <Tabs defaultValue="assignments" className="space-y-6">
+          <TabsList className="grid w-full max-w-md grid-cols-2 h-12">
+            <TabsTrigger value="assignments" className="flex items-center gap-2">
+              <ClipboardList className="h-4 w-4" />
+              <span>Assignments</span>
+            </TabsTrigger>
+            <TabsTrigger value="submissions" className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" />
+              <span>My Progress</span>
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="assignments">
+          <TabsContent value="assignments" className="space-y-4">
             {assignments.length === 0 ? (
-              <Card>
-                <CardContent className="py-12">
-                  <p className="text-center text-muted-foreground">
-                    No assignments available
-                  </p>
+              <Card className="shadow-lg">
+                <CardContent className="py-16">
+                  <div className="text-center space-y-4">
+                    <BookOpen className="h-16 w-16 mx-auto text-muted-foreground opacity-50" />
+                    <div>
+                      <p className="text-xl font-semibold text-muted-foreground">
+                        No assignments available
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Check back later for new assignments from your instructors
+                      </p>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             ) : (
               <div className="grid gap-4">
-                {assignments.map((assignment) => (
-                  <Card key={assignment.id}>
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <CardTitle>{assignment.title}</CardTitle>
-                          <CardDescription>
-                            By {assignment.instructor.full_name}
-                            {assignment.due_date && (
-                              <> • Due {new Date(assignment.due_date).toLocaleDateString()}</>
+                {assignments.map((assignment, index) => {
+                  const percentage = assignment.submission 
+                    ? Math.round((assignment.submission.score / assignment.submission.total_questions) * 100)
+                    : 0;
+                  const scoreColor = percentage >= 80 ? "bg-green-500" : percentage >= 60 ? "bg-yellow-500" : "bg-red-500";
+                  
+                  return (
+                    <Card 
+                      key={assignment.id} 
+                      className="shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01] border-2 hover:border-primary/50 animate-fade-in"
+                      style={{ animationDelay: `${index * 0.1}s` }}
+                    >
+                      <CardHeader>
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1 space-y-2">
+                            <CardTitle className="text-xl flex items-center gap-2">
+                              <BookOpen className="h-5 w-5 text-primary" />
+                              {assignment.title}
+                            </CardTitle>
+                            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <User className="h-3 w-3" />
+                                {assignment.instructor.full_name}
+                              </span>
+                              {assignment.due_date && (
+                                <span className={cn(
+                                  "flex items-center gap-1",
+                                  isOverdue(assignment.due_date) && "text-red-500 font-semibold",
+                                  isDueSoon(assignment.due_date) && "text-yellow-600 font-semibold"
+                                )}>
+                                  <Calendar className="h-3 w-3" />
+                                  Due {new Date(assignment.due_date).toLocaleDateString()}
+                                  {isOverdue(assignment.due_date) && " (Overdue)"}
+                                  {isDueSoon(assignment.due_date) && " (Due Soon)"}
+                                </span>
+                              )}
+                              <span className="flex items-center gap-1">
+                                <FileText className="h-3 w-3" />
+                                {assignment.questions.length} questions
+                              </span>
+                            </div>
+                          </div>
+                          <div>
+                            {assignment.submission ? (
+                              <Badge variant="secondary" className={cn("shadow-md", scoreColor, "text-white")}>
+                                <CheckCircle2 className="h-3 w-3 mr-1" />
+                                {percentage}% ({assignment.submission.score}/{assignment.submission.total_questions})
+                              </Badge>
+                            ) : (
+                              <Badge className="shadow-md">
+                                Not Started
+                              </Badge>
                             )}
-                          </CardDescription>
+                          </div>
                         </div>
-                        {assignment.submission ? (
-                          <Badge variant="secondary">
-                            Completed ({assignment.submission.score}/
-                            {assignment.submission.total_questions})
-                          </Badge>
-                        ) : (
-                          <Badge>Not Started</Badge>
-                        )}
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm text-muted-foreground">
-                          {assignment.questions.length} questions
-                        </p>
-                        {!assignment.submission && (
-                          <Button onClick={() => startAssignment(assignment)}>
+                      </CardHeader>
+                      {!assignment.submission && (
+                        <CardContent>
+                          <Button 
+                            onClick={() => startAssignment(assignment)}
+                            className="w-full hover:scale-[1.02] transition-transform shadow-md"
+                          >
+                            <BookOpen className="h-4 w-4 mr-2" />
                             Start Assignment
                           </Button>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                        </CardContent>
+                      )}
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </TabsContent>
 
           <TabsContent value="submissions">
-            <Card>
+            <Card className="shadow-lg">
               <CardHeader>
-                <CardTitle>My Submissions</CardTitle>
-                <CardDescription>View your past assignment submissions</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <Award className="h-5 w-5" />
+                  My Submissions
+                </CardTitle>
+                <CardDescription>Track your progress and past submissions</CardDescription>
               </CardHeader>
               <CardContent>
                 {mySubmissions.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">
-                    No submissions yet
-                  </p>
+                  <div className="text-center py-12 space-y-4">
+                    <ClipboardList className="h-16 w-16 mx-auto text-muted-foreground opacity-50" />
+                    <div>
+                      <p className="text-xl font-semibold text-muted-foreground">
+                        No submissions yet
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Complete your first assignment to see your progress here
+                      </p>
+                    </div>
+                  </div>
                 ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Assignment</TableHead>
-                        <TableHead>Score</TableHead>
-                        <TableHead>Percentage</TableHead>
-                        <TableHead>Submitted</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {mySubmissions.map((submission) => (
-                        <TableRow key={submission.id}>
-                          <TableCell className="font-medium">
-                            {submission.assignment.title}
-                          </TableCell>
-                          <TableCell>
-                            {submission.score}/{submission.total_questions}
-                          </TableCell>
-                          <TableCell>
-                            {Math.round(
-                              (submission.score / submission.total_questions) * 100
-                            )}
-                            %
-                          </TableCell>
-                          <TableCell>
-                            {new Date(submission.submitted_at).toLocaleDateString()}
-                          </TableCell>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Assignment</TableHead>
+                          <TableHead>Score</TableHead>
+                          <TableHead>Percentage</TableHead>
+                          <TableHead>Submitted</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {mySubmissions.map((submission) => {
+                          const percentage = Math.round((submission.score / submission.total_questions) * 100);
+                          const scoreColor = percentage >= 80 ? "text-green-600 dark:text-green-400" : percentage >= 60 ? "text-yellow-600 dark:text-yellow-400" : "text-red-600 dark:text-red-400";
+                          const bgColor = percentage >= 80 ? "bg-green-500/10" : percentage >= 60 ? "bg-yellow-500/10" : "bg-red-500/10";
+                          
+                          return (
+                            <TableRow 
+                              key={submission.id}
+                              className="hover:bg-muted/50 transition-colors"
+                            >
+                              <TableCell className="font-medium">
+                                <div className="flex items-center gap-2">
+                                  <FileText className="h-4 w-4 text-muted-foreground" />
+                                  {submission.assignment.title}
+                                </div>
+                              </TableCell>
+                              <TableCell className="font-semibold">
+                                {submission.score}/{submission.total_questions}
+                              </TableCell>
+                              <TableCell>
+                                <Badge className={cn("shadow-sm", bgColor, scoreColor, "border-0")}>
+                                  {percentage >= 80 && <CheckCircle2 className="h-3 w-3 mr-1" />}
+                                  {percentage}%
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-muted-foreground">
+                                <div className="flex items-center gap-2">
+                                  <Clock className="h-3 w-3" />
+                                  {getRelativeTime(submission.submitted_at)}
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </div>
                 )}
               </CardContent>
             </Card>
