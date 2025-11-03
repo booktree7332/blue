@@ -11,7 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, BookOpen, ClipboardList, Award, Calendar, User, Clock, FileText, TrendingUp, LogOut } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, BookOpen, ClipboardList, Award, Calendar, User, Clock, FileText, TrendingUp, LogOut, Paperclip, ExternalLink, Image as ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Question {
@@ -28,6 +28,8 @@ interface Assignment {
   title: string;
   description: string | null;
   due_date: string | null;
+  file_url: string | null;
+  file_type: string | null;
   instructor: {
     full_name: string;
   };
@@ -274,6 +276,38 @@ const Student = () => {
             </div>
           </div>
 
+          {currentAssignment.file_url && (
+            <Card className="shadow-lg border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Paperclip className="h-5 w-5 text-primary" />
+                  Assignment Reference Material
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {currentAssignment.file_type?.startsWith('image/') ? (
+                  <div className="space-y-2">
+                    <img 
+                      src={currentAssignment.file_url} 
+                      alt="Assignment reference" 
+                      className="w-full rounded-lg border shadow-md max-h-96 object-contain"
+                    />
+                  </div>
+                ) : (
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => window.open(currentAssignment.file_url!, '_blank')}
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    Open PDF Reference
+                    <ExternalLink className="h-4 w-4 ml-2" />
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           <Card className="shadow-xl border-2 hover:shadow-2xl transition-all duration-300 animate-scale-in">
             <CardHeader className="pb-4">
               <CardTitle className="text-xl leading-relaxed">{currentQuestion.text}</CardTitle>
@@ -394,6 +428,38 @@ const Student = () => {
               </div>
             </CardContent>
           </Card>
+
+          {currentAssignment.file_url && (
+            <Card className="shadow-lg border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Paperclip className="h-5 w-5 text-primary" />
+                  Assignment Reference Material
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {currentAssignment.file_type?.startsWith('image/') ? (
+                  <div className="space-y-2">
+                    <img 
+                      src={currentAssignment.file_url} 
+                      alt="Assignment reference" 
+                      className="w-full rounded-lg border shadow-md max-h-96 object-contain"
+                    />
+                  </div>
+                ) : (
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => window.open(currentAssignment.file_url!, '_blank')}
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    Open PDF Reference
+                    <ExternalLink className="h-4 w-4 ml-2" />
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           <Card className="shadow-xl">
             <CardHeader>
@@ -632,6 +698,12 @@ const Student = () => {
                                 <FileText className="h-3 w-3" />
                                 {assignment.questions.length} questions
                               </span>
+                              {assignment.file_url && (
+                                <Badge variant="outline" className="flex items-center gap-1">
+                                  <Paperclip className="h-3 w-3" />
+                                  Attachment
+                                </Badge>
+                              )}
                             </div>
                           </div>
                           <div>

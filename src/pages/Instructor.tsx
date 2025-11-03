@@ -206,6 +206,18 @@ const Instructor = () => {
 
     setSubmitting(true);
     try {
+      // Upload file if present
+      let fileUrl = null;
+      let fileType = null;
+      if (uploadedFile) {
+        fileUrl = await handleFileUpload(uploadedFile);
+        if (!fileUrl) {
+          setSubmitting(false);
+          return; // File upload failed, abort
+        }
+        fileType = uploadedFile.type;
+      }
+
       const { data: assignment, error: assignmentError } = await supabase
         .from("assignments")
         .insert({
@@ -213,6 +225,8 @@ const Instructor = () => {
           description: description || null,
           instructor_id: user?.id,
           due_date: dueDate?.toISOString() || null,
+          file_url: fileUrl,
+          file_type: fileType,
         })
         .select()
         .single();
