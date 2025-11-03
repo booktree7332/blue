@@ -209,6 +209,22 @@ const Instructor = () => {
 
     setSubmitting(true);
     try {
+      const getFileType = (mimeType: string): 'image' | 'pdf' | 'document' | 'presentation' | null => {
+        if (mimeType.startsWith('image/')) {
+          return 'image';
+        }
+        if (mimeType === 'application/pdf') {
+          return 'pdf';
+        }
+        if (mimeType === 'application/msword' || mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+          return 'document';
+        }
+        if (mimeType === 'application/vnd.ms-powerpoint' || mimeType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation') {
+          return 'presentation';
+        }
+        return null;
+      };
+
       // Upload file if present
       let fileUrl = null;
       let fileType = null;
@@ -218,7 +234,7 @@ const Instructor = () => {
           setSubmitting(false);
           return; // File upload failed, abort
         }
-        fileType = uploadedFile.type;
+        fileType = getFileType(uploadedFile.type);
       }
 
       const { data: assignment, error: assignmentError } = await supabase
