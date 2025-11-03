@@ -660,13 +660,29 @@ const Admin = () => {
                         <Card 
                           key={qIndex}
                           className={cn(
-                            "aspect-square cursor-pointer hover:shadow-md transition-all",
+                            "aspect-square cursor-pointer hover:shadow-md transition-all relative",
                             expandedQuestion === qIndex && "ring-2 ring-primary shadow-lg"
                           )}
                           onClick={() => {
                             setExpandedQuestion(expandedQuestion === qIndex ? null : qIndex);
                           }}
                         >
+                          {questions.length > 1 && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="absolute top-2 right-2 h-6 w-6 hover:bg-destructive/10"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (expandedQuestion === qIndex) {
+                                  setExpandedQuestion(null);
+                                }
+                                removeQuestion(qIndex);
+                              }}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          )}
                           <CardContent className="p-4 flex flex-col items-center justify-center h-full text-center">
                             <span className="font-semibold text-lg">Question {qIndex + 1}</span>
                             {question.text && (
