@@ -76,6 +76,7 @@ const Admin = () => {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedQuestion, setExpandedQuestion] = useState<number | null>(null);
 
   // Create Assignment States
   const [instructorsList, setInstructorsList] = useState<Instructor[]>([]);
@@ -658,9 +659,12 @@ const Admin = () => {
                       {questions.map((question, qIndex) => (
                         <Card 
                           key={qIndex}
-                          className="aspect-square cursor-pointer hover:shadow-md transition-shadow"
+                          className={cn(
+                            "aspect-square cursor-pointer hover:shadow-md transition-all",
+                            expandedQuestion === qIndex && "ring-2 ring-primary shadow-lg"
+                          )}
                           onClick={() => {
-                            document.getElementById(`question-form-${qIndex}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            setExpandedQuestion(expandedQuestion === qIndex ? null : qIndex);
                           }}
                         >
                           <CardContent className="p-4 flex flex-col items-center justify-center h-full text-center">
@@ -673,17 +677,35 @@ const Admin = () => {
                           </CardContent>
                         </Card>
                       ))}
+                      
+                      {/* Add Question button */}
+                      <Card 
+                        className="aspect-square cursor-pointer border-dashed hover:border-solid hover:bg-accent/10 transition-all"
+                        onClick={addQuestion}
+                      >
+                        <CardContent className="p-4 flex flex-col items-center justify-center h-full">
+                          <Plus className="h-8 w-8 text-muted-foreground" />
+                          <span className="text-sm font-medium text-muted-foreground mt-2">Add Question</span>
+                        </CardContent>
+                      </Card>
                     </div>
 
-                    {/* Full Question Forms */}
-                    <div className="space-y-4 mt-6">
-                      {questions.map((question, qIndex) => (
-                        <Card key={qIndex} id={`question-form-${qIndex}`} className="border rounded-lg">
+                    {/* Full Question Form - only show expanded question */}
+                    {expandedQuestion !== null && questions[expandedQuestion] && (
+                      <div className="mt-6">
+                        <Card id={`question-form-${expandedQuestion}`} className="border rounded-lg">
                           <CardHeader>
                             <div className="flex items-center justify-between">
-                              <CardTitle className="text-lg">Question {qIndex + 1}</CardTitle>
+                              <CardTitle className="text-lg">Question {expandedQuestion + 1}</CardTitle>
                               {questions.length > 1 && (
-                                <Button variant="ghost" size="sm" onClick={() => removeQuestion(qIndex)}>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => {
+                                    removeQuestion(expandedQuestion);
+                                    setExpandedQuestion(null);
+                                  }}
+                                >
                                   <Trash2 className="h-4 w-4 mr-2" />
                                   Remove Question
                                 </Button>
@@ -695,31 +717,31 @@ const Admin = () => {
                               <Label>Question Text</Label>
                               <Input 
                                 placeholder="Enter question text" 
-                                value={question.text} 
-                                onChange={e => updateQuestion(qIndex, "text", e.target.value)} 
+                                value={questions[expandedQuestion].text} 
+                                onChange={e => updateQuestion(expandedQuestion, "text", e.target.value)} 
                               />
                             </div>
 
                             <div className="space-y-3">
                               <RadioGroup 
-                                value={question.correctAnswer.toString()} 
-                                onValueChange={value => updateQuestion(qIndex, "correctAnswer", parseInt(value))}
+                                value={questions[expandedQuestion].correctAnswer.toString()} 
+                                onValueChange={value => updateQuestion(expandedQuestion, "correctAnswer", parseInt(value))}
                               >
-                                {question.options.map((option, oIndex) => (
+                                {questions[expandedQuestion].options.map((option, oIndex) => (
                                   <div key={oIndex} className="flex items-center gap-2">
                                     <RadioGroupItem 
                                       value={oIndex.toString()} 
-                                      id={`q${qIndex}-o${oIndex}`} 
+                                      id={`q${expandedQuestion}-o${oIndex}`} 
                                       className="shrink-0" 
                                     />
                                     <div className="flex-1">
                                       <Input 
                                         placeholder={`Option ${oIndex + 1}`} 
                                         value={option} 
-                                        onChange={e => updateOption(qIndex, oIndex, e.target.value)} 
+                                        onChange={e => updateOption(expandedQuestion, oIndex, e.target.value)} 
                                       />
                                     </div>
-                                    {question.correctAnswer === oIndex && (
+                                    {questions[expandedQuestion].correctAnswer === oIndex && (
                                       <span className="text-xs font-medium shrink-0 text-[#a5d160]">
                                         ✓ Correct
                                       </span>
@@ -730,24 +752,19 @@ const Admin = () => {
                             </div>
 
                             <div className="space-y-2">
-                              <Label htmlFor={`explanation-${qIndex}`}>Explanation (Optional)</Label>
+                              <Label htmlFor={`explanation-${expandedQuestion}`}>Explanation (Optional)</Label>
                               <Textarea 
-                                id={`explanation-${qIndex}`} 
+                                id={`explanation-${expandedQuestion}`} 
                                 placeholder="Explain why this answer is correct..." 
-                                value={question.explanation} 
-                                onChange={e => updateQuestion(qIndex, "explanation", e.target.value)} 
+                                value={questions[expandedQuestion].explanation} 
+                                onChange={e => updateQuestion(expandedQuestion, "explanation", e.target.value)} 
                                 rows={3} 
                               />
                             </div>
                           </CardContent>
                         </Card>
-                      ))}
-                    </div>
-
-                    <Button onClick={addQuestion} variant="outline" className="w-full">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Question
-                    </Button>
+                      </div>
+                    )}
                   </div>
 
                   <Button onClick={handleCreateAssignment} className="w-full" disabled={submitting}>
