@@ -23,6 +23,8 @@ export type Database = {
           file_url: string | null
           id: string
           instructor_id: string
+          is_resubmittable: boolean
+          max_attempts: number | null
           title: string
           updated_at: string
         }
@@ -34,6 +36,8 @@ export type Database = {
           file_url?: string | null
           id?: string
           instructor_id: string
+          is_resubmittable?: boolean
+          max_attempts?: number | null
           title: string
           updated_at?: string
         }
@@ -45,6 +49,8 @@ export type Database = {
           file_url?: string | null
           id?: string
           instructor_id?: string
+          is_resubmittable?: boolean
+          max_attempts?: number | null
           title?: string
           updated_at?: string
         }

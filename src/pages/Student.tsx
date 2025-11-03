@@ -30,6 +30,8 @@ interface Assignment {
   due_date: string | null;
   file_url: string | null;
   file_type: string | null;
+  is_resubmittable: boolean;
+  max_attempts: number | null;
   instructor: {
     full_name: string;
   };
@@ -39,6 +41,7 @@ interface Assignment {
     score: number;
     total_questions: number;
   };
+  submission_count?: number;
 }
 
 interface Submission {
@@ -76,7 +79,7 @@ const Student = () => {
         .select(`
           *,
           instructor:profiles!instructor_id(full_name),
-          submissions!submissions_assignment_id_fkey!left(id, score, total_questions)
+          submissions!submissions_assignment_id_fkey!left(id, score, total_questions, student_id)
         `)
         .order("created_at", { ascending: false });
 
@@ -100,12 +103,17 @@ const Student = () => {
             order_number: q.order_number,
           })).sort((a: Question, b: Question) => a.order_number - b.order_number);
 
+          // Count submissions for current student
+          const studentSubmissions = assignment.submissions.filter(
+            (sub: any) => sub && user && sub.student_id === user.id
+          );
+          const submissionCount = studentSubmissions.length;
+
           return {
             ...assignment,
             questions,
-            submission: assignment.submissions.find(
-              (sub: any) => sub && user && sub.student_id === user.id
-            ),
+            submission: studentSubmissions[studentSubmissions.length - 1], // Most recent submission
+            submission_count: submissionCount,
           };
         })
       );
@@ -162,6 +170,14 @@ const Student = () => {
 
   const handleSubmit = async () => {
     if (!currentAssignment || !user) return;
+
+    // Check if student has exceeded max attempts
+    if (currentAssignment.max_attempts && currentAssignment.submission_count) {
+      if (currentAssignment.submission_count >= currentAssignment.max_attempts) {
+        toast.error(`You have reached the maximum number of attempts (${currentAssignment.max_attempts}) for this assignment`);
+        return;
+      }
+    }
 
     const allQuestionsAnswered = currentAssignment.questions.every(
       (_, index) => selectedAnswers[index] !== undefined
@@ -603,6 +619,36 @@ const Student = () => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Assignments
           </Button>
+
+          {currentAssignment.is_resubmittable && (
+            <Card className="border-2 border-accent/50 bg-accent/5">
+              <CardContent className="py-4">
+                <div className="flex items-center gap-3 text-sm">
+                  <Clock className="h-5 w-5 text-accent" />
+                  <div>
+                    {currentAssignment.max_attempts ? (
+                      <p className="font-medium">
+                        You have used <span className="font-bold">{(currentAssignment.submission_count || 0) + 1}</span> of <span className="font-bold">{currentAssignment.max_attempts}</span> attempts.
+                        {(currentAssignment.max_attempts - ((currentAssignment.submission_count || 0) + 1)) > 0 ? (
+                          <span className="text-accent ml-1">
+                            You have {currentAssignment.max_attempts - ((currentAssignment.submission_count || 0) + 1)} attempt{currentAssignment.max_attempts - ((currentAssignment.submission_count || 0) + 1) !== 1 ? 's' : ''} remaining.
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground ml-1">
+                            You have reached the maximum number of attempts.
+                          </span>
+                        )}
+                      </p>
+                    ) : (
+                      <p className="font-medium">
+                        This assignment allows unlimited retakes. You can improve your score anytime!
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     );
@@ -742,6 +788,14 @@ const Student = () => {
                                   Attachment
                                 </Badge>
                               )}
+                              {assignment.is_resubmittable && assignment.submission && (
+                                <Badge variant="outline" className="flex items-center gap-1 text-accent">
+                                  <Clock className="h-3 w-3" />
+                                  {assignment.max_attempts 
+                                    ? `${assignment.submission_count || 0}/${assignment.max_attempts} attempts` 
+                                    : "Unlimited attempts"}
+                                </Badge>
+                              )}
                             </div>
                           </div>
                           <div>
@@ -758,8 +812,8 @@ const Student = () => {
                           </div>
                         </div>
                       </CardHeader>
-                      {!assignment.submission && (
-                        <CardContent>
+                      <CardContent>
+                        {!assignment.submission ? (
                           <Button 
                             onClick={() => startAssignment(assignment)}
                             className="w-full hover:scale-[1.02] transition-transform shadow-md"
@@ -767,8 +821,28 @@ const Student = () => {
                             <BookOpen className="h-4 w-4 mr-2" />
                             Start Assignment
                           </Button>
-                        </CardContent>
-                      )}
+                        ) : assignment.is_resubmittable && 
+                           (!assignment.max_attempts || (assignment.submission_count || 0) < assignment.max_attempts) ? (
+                          <Button 
+                            onClick={() => startAssignment(assignment)}
+                            variant="outline"
+                            className="w-full hover:scale-[1.02] transition-transform shadow-md"
+                          >
+                            <BookOpen className="h-4 w-4 mr-2" />
+                            Retake Assignment
+                            {assignment.max_attempts && (
+                              <span className="ml-2 text-xs">
+                                ({(assignment.max_attempts - (assignment.submission_count || 0))} attempts left)
+                              </span>
+                            )}
+                          </Button>
+                        ) : assignment.submission && assignment.is_resubmittable && 
+                           assignment.max_attempts && (assignment.submission_count || 0) >= assignment.max_attempts ? (
+                          <div className="text-sm text-muted-foreground text-center py-2">
+                            Maximum attempts reached
+                          </div>
+                        ) : null}
+                      </CardContent>
                     </Card>
                   );
                 })}

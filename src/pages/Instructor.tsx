@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -56,6 +57,8 @@ const Instructor = () => {
   const [assignmentTitle, setAssignmentTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState<Date>();
+  const [isResubmittable, setIsResubmittable] = useState(false);
+  const [maxAttempts, setMaxAttempts] = useState<number>(1);
   const [questions, setQuestions] = useState<QuestionForm[]>([
     { text: "", options: ["", "", "", ""], correctAnswer: 0, explanation: "" },
   ]);
@@ -227,6 +230,8 @@ const Instructor = () => {
           due_date: dueDate?.toISOString() || null,
           file_url: fileUrl,
           file_type: fileType,
+          is_resubmittable: isResubmittable,
+          max_attempts: isResubmittable ? maxAttempts : null,
         })
         .select()
         .single();
@@ -252,6 +257,8 @@ const Instructor = () => {
       setAssignmentTitle("");
       setDescription("");
       setDueDate(undefined);
+      setIsResubmittable(false);
+      setMaxAttempts(1);
       setUploadedFile(null);
       setQuestions([{ text: "", options: ["", "", "", ""], correctAnswer: 0, explanation: "" }]);
       fetchMyAssignments();
@@ -380,6 +387,36 @@ const Instructor = () => {
                       <p className="text-xs text-muted-foreground">
                         Upload an image or PDF file to attach to this assignment
                       </p>
+                    </div>
+
+                    <div className="space-y-4 border-t pt-4">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          id="resubmittable"
+                          checked={isResubmittable}
+                          onCheckedChange={(checked) => setIsResubmittable(checked as boolean)}
+                        />
+                        <Label htmlFor="resubmittable" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          Allow students to resubmit this assignment
+                        </Label>
+                      </div>
+                      
+                      {isResubmittable && (
+                        <div className="space-y-2 pl-6">
+                          <Label htmlFor="maxAttempts">Maximum number of attempts</Label>
+                          <Input
+                            id="maxAttempts"
+                            type="number"
+                            min="1"
+                            value={maxAttempts}
+                            onChange={(e) => setMaxAttempts(Math.max(1, parseInt(e.target.value) || 1))}
+                            placeholder="Enter number of attempts"
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            Students can submit this assignment up to {maxAttempts} time{maxAttempts !== 1 ? 's' : ''}
+                          </p>
+                        </div>
+                      )}
                     </div>
 
                     <Button onClick={handleSubmit} className="w-full" disabled={submitting}>
