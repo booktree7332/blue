@@ -334,7 +334,7 @@ const Student = () => {
             <Card className="shadow-lg border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5">
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <Paperclip className="h-5 w-5 text-primary" />
+                  <Paperclip className="h-5 w-5" color="#474747" />
                   Assignment Reference Material
                 </CardTitle>
               </CardHeader>
