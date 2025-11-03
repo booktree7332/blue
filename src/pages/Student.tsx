@@ -74,22 +74,39 @@ const Student = () => {
         .select(`
           *,
           instructor:profiles!instructor_id(full_name),
-          questions(*),
           submissions!submissions_assignment_id_fkey!left(id, score, total_questions)
         `)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
 
-      const formattedAssignments = (data || []).map((assignment: any) => ({
-        ...assignment,
-        questions: assignment.questions.sort(
-          (a: Question, b: Question) => a.order_number - b.order_number
-        ),
-        submission: assignment.submissions.find(
-          (sub: any) => sub && user && sub.student_id === user.id
-        ),
-      }));
+      // Fetch questions separately using secure function that hides answers from students
+      const formattedAssignments = await Promise.all(
+        (data || []).map(async (assignment: any) => {
+          const { data: questionsData } = await supabase.rpc(
+            "get_assignment_questions",
+            { _assignment_id: assignment.id, _include_answers: false }
+          );
+
+          // Transform RPC data to match Question interface
+          const questions = (questionsData || []).map((q: any) => ({
+            id: q.id,
+            text: q.text,
+            options: Array.isArray(q.options) ? q.options : JSON.parse(q.options as string),
+            correct_answer: q.correct_answer,
+            explanation: q.explanation,
+            order_number: q.order_number,
+          })).sort((a: Question, b: Question) => a.order_number - b.order_number);
+
+          return {
+            ...assignment,
+            questions,
+            submission: assignment.submissions.find(
+              (sub: any) => sub && user && sub.student_id === user.id
+            ),
+          };
+        })
+      );
 
       setAssignments(formattedAssignments);
     } catch (error: any) {
