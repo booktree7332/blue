@@ -11,7 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, BookOpen, ClipboardList, Award, Calendar, User, Clock, FileText, TrendingUp } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, BookOpen, ClipboardList, Award, Calendar, User, Clock, FileText, TrendingUp, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Question {
@@ -51,7 +51,7 @@ interface Submission {
 
 const Student = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [mySubmissions, setMySubmissions] = useState<Submission[]>([]);
   const [currentAssignment, setCurrentAssignment] = useState<Assignment | null>(null);
@@ -529,25 +529,36 @@ const Student = () => {
     return new Date(dueDate) < new Date();
   };
 
+  const handleLogout = async () => {
+    await signOut();
+    navigate("/auth");
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-6">
       <div className="max-w-6xl mx-auto space-y-6 animate-fade-in">
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => navigate("/")}
-            className="hover:scale-110 transition-transform"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div className="flex-1">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-              Student Portal
-            </h1>
-            <p className="text-muted-foreground mt-1">Welcome back! Ready to learn?</p>
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => navigate("/")}
+              className="hover:scale-110 transition-transform"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                Student Portal
+              </h1>
+              <p className="text-muted-foreground mt-1">Welcome back! Ready to learn?</p>
+            </div>
           </div>
+          <Button variant="outline" onClick={handleLogout}>
+            <LogOut className="h-4 w-4 mr-2" />
+            Logout
+          </Button>
         </div>
 
         <Tabs defaultValue="assignments" className="space-y-6">
