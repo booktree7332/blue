@@ -1159,7 +1159,7 @@ const Admin = () => {
                                         />
                                         <Bar 
                                           dataKey="count" 
-                                          fill="hsl(var(--chart-1))"
+                                          fill="hsl(var(--data-viz))"
                                           radius={[4, 4, 0, 0]}
                                         />
                                       </BarChart>
