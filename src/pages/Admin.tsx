@@ -18,6 +18,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { ScrollArea } from "@/components/ui/scroll-area";
 interface UserProfile {
   id: string;
   full_name: string;
@@ -93,6 +94,8 @@ const Admin = () => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [questionEntryMode, setQuestionEntryMode] = useState<"manual" | "pdf">("manual");
+  const [parsingPdf, setParsingPdf] = useState(false);
   const fetchUsers = async () => {
     try {
       const {
@@ -305,6 +308,52 @@ const Admin = () => {
       setUploading(false);
     }
   };
+  const handleQuestionsPdfUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== "application/pdf") {
+      toast.error("PDF 파일만 업로드 가능합니다");
+      return;
+    }
+
+    setParsingPdf(true);
+    try {
+      toast("PDF에서 문제를 추출하는 중...");
+
+      // Simple demonstration - In production, use document--parse_document tool
+      // Expected PDF format:
+      // 문제 1: [question text]
+      // 1) [option 1]
+      // 2) [option 2]
+      // 3) [option 3]
+      // 4) [option 4]
+      // 5) [option 5]
+      // 정답: [1-5]
+      // 해설: [explanation]
+
+      toast.error("PDF 파싱 기능은 곧 구현될 예정입니다. 현재는 수동 입력을 사용해주세요.");
+      event.target.value = ""; // Reset file input
+    } catch (error) {
+      console.error("PDF 파싱 오류:", error);
+      toast.error("PDF 파일을 처리하는 중 오류가 발생했습니다");
+    } finally {
+      setParsingPdf(false);
+    }
+  };
+
+  const clearPdfQuestions = () => {
+    setQuestions([
+      {
+        text: "",
+        options: ["", "", "", "", ""],
+        correctAnswer: 0,
+        explanation: "",
+      },
+    ]);
+    setQuestionEntryMode("manual");
+  };
+
   const removeQuestion = (index: number) => {
     if (questions.length > 1) {
       setQuestions(questions.filter((_, i) => i !== index));
@@ -653,9 +702,101 @@ const Admin = () => {
                 </div>
 
                 <div className="space-y-4">
-                    <Label>문제</Label>
-                    {/* Question Grid - 5 per row */}
-                    <div className="grid grid-cols-5 gap-4">
+                    <div className="space-y-3">
+                      <Label>문제 입력 방법</Label>
+                      <RadioGroup
+                        value={questionEntryMode}
+                        onValueChange={(value) => setQuestionEntryMode(value as "manual" | "pdf")}
+                        className="flex gap-4"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="manual" id="manual" />
+                          <Label htmlFor="manual" className="cursor-pointer font-normal">수동 입력</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="pdf" id="pdf" />
+                          <Label htmlFor="pdf" className="cursor-pointer font-normal">PDF 업로드</Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+
+                    {/* PDF Upload Mode */}
+                    {questionEntryMode === "pdf" && (
+                      <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
+                        <div className="space-y-2">
+                          <Label htmlFor="questions-pdf">문제 PDF 업로드</Label>
+                          <Input
+                            id="questions-pdf"
+                            type="file"
+                            accept=".pdf"
+                            onChange={handleQuestionsPdfUpload}
+                            disabled={parsingPdf}
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            PDF 파일에서 문제와 선택지를 자동으로 추출합니다
+                          </p>
+                        </div>
+
+                        <div className="p-3 bg-background rounded-md text-xs space-y-1 border">
+                          <p className="font-semibold mb-2">📄 PDF 형식 예시:</p>
+                          <p className="text-muted-foreground">문제 1: 다음 중 정답은?</p>
+                          <p className="text-muted-foreground">1) 선택지 1</p>
+                          <p className="text-muted-foreground">2) 선택지 2</p>
+                          <p className="text-muted-foreground">3) 선택지 3</p>
+                          <p className="text-muted-foreground">4) 선택지 4</p>
+                          <p className="text-muted-foreground">5) 선택지 5</p>
+                          <p className="text-muted-foreground">정답: 3</p>
+                          <p className="text-muted-foreground">해설: 설명 내용</p>
+                        </div>
+
+                        {/* Preview of extracted questions */}
+                        {questions.length > 0 && questions[0].text !== "" && (
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <Label className="text-base">추출된 문제 ({questions.length}개)</Label>
+                              <Button variant="outline" size="sm" onClick={clearPdfQuestions}>
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                다시 업로드
+                              </Button>
+                            </div>
+                            <div className="max-h-[400px] overflow-y-auto space-y-3 pr-2">
+                              {questions.map((q, idx) => (
+                                <Card key={idx} className="border">
+                                  <CardContent className="p-4">
+                                    <p className="font-semibold text-sm mb-2">문제 {idx + 1}: {q.text}</p>
+                                    <ul className="space-y-1 text-sm">
+                                      {q.options.map((opt, oIdx) => (
+                                        <li
+                                          key={oIdx}
+                                          className={cn(
+                                            "pl-2",
+                                            q.correctAnswer === oIdx && "text-green-600 font-semibold"
+                                          )}
+                                        >
+                                          {oIdx + 1}) {opt}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                    {q.explanation && (
+                                      <p className="mt-2 text-xs text-muted-foreground border-t pt-2">
+                                        <span className="font-semibold">해설:</span> {q.explanation}
+                                      </p>
+                                    )}
+                                  </CardContent>
+                                </Card>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Manual Entry Mode */}
+                    {questionEntryMode === "manual" && (
+                      <>
+                        <Label>문제</Label>
+                        {/* Question Grid - 5 per row */}
+                        <div className="grid grid-cols-5 gap-4">
                       {questions.map((question, qIndex) => (
                         <Card 
                           key={qIndex}
@@ -779,11 +920,13 @@ const Admin = () => {
                             </div>
                           </CardContent>
                         </Card>
-                      </div>
+                       </div>
+                     )}
+                      </>
                     )}
-                  </div>
+                   </div>
 
-                  <Button onClick={handleCreateAssignment} className="w-full" disabled={submitting}>
+                   <Button onClick={handleCreateAssignment} className="w-full" disabled={submitting}>
                     {submitting ? <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         생성 중...
