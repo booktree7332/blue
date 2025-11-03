@@ -295,7 +295,7 @@ const Instructor = () => {
           </TabsList>
 
           <TabsContent value="create">
-            <div className="grid lg:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-2 gap-6">
               {/* Left Column - Assignment Details */}
               <div className="space-y-6">
                 <Card>
