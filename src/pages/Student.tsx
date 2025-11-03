@@ -793,7 +793,7 @@ const Student = () => {
                                 </Badge>
                               )}
                               {assignment.is_resubmittable && assignment.submission && (
-                                <Badge variant="outline" className="flex items-center gap-1 text-accent">
+                                <Badge variant="outline" className="flex items-center gap-1 text-foreground">
                                   <Clock className="h-3 w-3" />
                                   {assignment.max_attempts 
                                     ? `${assignment.submission_count || 0}/${assignment.max_attempts} attempts` 
