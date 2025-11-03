@@ -181,31 +181,18 @@ const Admin = () => {
 
       if (rolesError) throw rolesError;
 
-      const instructorIds = roles
-        .filter(r => r.role === "instructor")
+      // Include both instructors and admins in the list
+      const instructorAndAdminIds = roles
+        .filter(r => r.role === "instructor" || r.role === "admin")
         .map(r => r.user_id);
 
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select("id, full_name")
-        .in("id", instructorIds)
+        .in("id", instructorAndAdminIds)
         .eq("verified", true);
 
       if (profilesError) throw profilesError;
-
-      // Check if current user (admin) is also an instructor and add them if not already in list
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user && instructorIds.includes(user.id) && !profiles?.some(p => p.id === user.id)) {
-        const { data: userProfile } = await supabase
-          .from("profiles")
-          .select("id, full_name")
-          .eq("id", user.id)
-          .single();
-        
-        if (userProfile) {
-          profiles?.push(userProfile);
-        }
-      }
 
       setInstructorsList(profiles || []);
     } catch (error: any) {
