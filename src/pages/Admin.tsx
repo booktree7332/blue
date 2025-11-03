@@ -86,7 +86,7 @@ const Admin = () => {
   const [dueDate, setDueDate] = useState<Date>();
   const [questions, setQuestions] = useState<QuestionForm[]>([{
     text: "",
-    options: ["", "", "", ""],
+    options: ["", "", "", "", ""],
     correctAnswer: 0,
     explanation: ""
   }]);
@@ -262,7 +262,7 @@ const Admin = () => {
   const addQuestion = () => {
     setQuestions([...questions, {
       text: "",
-      options: ["", "", "", ""],
+      options: ["", "", "", "", ""],
       correctAnswer: 0,
       explanation: ""
     }]);
@@ -334,12 +334,12 @@ const Admin = () => {
     }
     for (let i = 0; i < questions.length; i++) {
       if (!questions[i].text.trim()) {
-        toast.error(`질문 ${i + 1}의 내용을 입력해주세요`);
+        toast.error(`문제 ${i + 1}의 내용을 입력해주세요`);
         return;
       }
-      for (let j = 0; j < 4; j++) {
+      for (let j = 0; j < 5; j++) {
         if (!questions[i].options[j].trim()) {
-          toast.error(`질문 ${i + 1}, 선택지 ${j + 1}을 입력해주세요`);
+          toast.error(`문제 ${i + 1}, 선택지 ${j + 1}을 입력해주세요`);
           return;
         }
       }
@@ -376,7 +376,7 @@ const Admin = () => {
       setUploadedFile(null);
       setQuestions([{
         text: "",
-        options: ["", "", "", ""],
+        options: ["", "", "", "", ""],
         correctAnswer: 0,
         explanation: ""
       }]);
@@ -653,7 +653,7 @@ const Admin = () => {
                 </div>
 
                 <div className="space-y-4">
-                    <Label>질문</Label>
+                    <Label>문제</Label>
                     {/* Question Grid - 5 per row */}
                     <div className="grid grid-cols-5 gap-4">
                       {questions.map((question, qIndex) => (
@@ -671,7 +671,7 @@ const Admin = () => {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="absolute top-2 right-2 h-6 w-6 hover:bg-destructive/10"
+                              className="absolute top-2 right-2 h-8 w-8 hover:bg-destructive/10"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 if (expandedQuestion === qIndex) {
@@ -680,13 +680,13 @@ const Admin = () => {
                                 removeQuestion(qIndex);
                               }}
                             >
-                              <Trash2 className="h-3 w-3" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           )}
                           <CardContent className="p-4 flex flex-col items-center justify-center h-full text-center">
-                            <span className="font-semibold text-lg">질문 {qIndex + 1}</span>
+                            <span className="font-semibold text-xl">문제 {qIndex + 1}</span>
                             {question.text && (
-                              <span className="text-xs text-muted-foreground mt-2 line-clamp-2">
+                              <span className="text-sm text-muted-foreground mt-2 line-clamp-2">
                                 {question.text}
                               </span>
                             )}
@@ -701,7 +701,7 @@ const Admin = () => {
                       >
                         <CardContent className="p-4 flex flex-col items-center justify-center h-full">
                           <Plus className="h-8 w-8 text-muted-foreground" />
-                          <span className="text-sm font-medium text-muted-foreground mt-2">질문 추가</span>
+                          <span className="text-sm font-medium text-muted-foreground mt-2">문제 추가</span>
                         </CardContent>
                       </Card>
                     </div>
@@ -712,7 +712,7 @@ const Admin = () => {
                         <Card id={`question-form-${expandedQuestion}`} className="border rounded-lg">
                           <CardHeader>
                             <div className="flex items-center justify-between">
-                              <CardTitle className="text-lg">질문 {expandedQuestion + 1}</CardTitle>
+                              <CardTitle className="text-lg">문제 {expandedQuestion + 1}</CardTitle>
                               {questions.length > 1 && (
                                 <Button 
                                   variant="ghost" 
@@ -723,16 +723,16 @@ const Admin = () => {
                                   }}
                                 >
                                   <Trash2 className="h-4 w-4 mr-2" />
-                                  질문 삭제
+                                  문제 삭제
                                 </Button>
                               )}
                             </div>
                           </CardHeader>
                           <CardContent className="space-y-4">
                             <div className="space-y-2">
-                              <Label>질문 내용</Label>
+                              <Label>문제 내용</Label>
                               <Input 
-                                placeholder="질문 내용을 입력하세요" 
+                                placeholder="문제 내용을 입력하세요" 
                                 value={questions[expandedQuestion].text} 
                                 onChange={e => updateQuestion(expandedQuestion, "text", e.target.value)} 
                               />
