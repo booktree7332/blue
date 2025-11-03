@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { signUpSchema, signInSchema, SignUpFormData, SignInFormData } from "@/lib/validations";
 import { ZodError } from "zod";
+import { cn } from "@/lib/utils";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -226,13 +227,29 @@ const Auth = () => {
                   }
                   className="gap-3"
                 >
-                  <div className="flex items-center space-x-3 rounded-lg border-2 border-border bg-card p-4 transition-all hover:border-primary hover:bg-accent/50 has-[:checked]:border-primary has-[:checked]:bg-primary/5 has-[:checked]:shadow-sm">
+                  <div 
+                    className={cn(
+                      "flex items-center space-x-3 rounded-lg border-2 p-4 transition-all hover:border-primary",
+                      signUpData.role === "student" 
+                        ? "border-primary shadow-sm" 
+                        : "border-border bg-card hover:bg-accent/50"
+                    )}
+                    style={signUpData.role === "student" ? { backgroundColor: '#F7EFE6' } : undefined}
+                  >
                     <RadioGroupItem value="student" id="student" />
                     <Label htmlFor="student" className="flex-1 font-medium cursor-pointer text-base">
                       Student
                     </Label>
                   </div>
-                  <div className="flex items-center space-x-3 rounded-lg border-2 border-border bg-card p-4 transition-all hover:border-primary hover:bg-accent/50 has-[:checked]:border-primary has-[:checked]:bg-primary/5 has-[:checked]:shadow-sm">
+                  <div 
+                    className={cn(
+                      "flex items-center space-x-3 rounded-lg border-2 p-4 transition-all hover:border-primary",
+                      signUpData.role === "instructor" 
+                        ? "border-primary shadow-sm" 
+                        : "border-border bg-card hover:bg-accent/50"
+                    )}
+                    style={signUpData.role === "instructor" ? { backgroundColor: '#F7EFE6' } : undefined}
+                  >
                     <RadioGroupItem value="instructor" id="instructor" />
                     <Label htmlFor="instructor" className="flex-1 font-medium cursor-pointer text-base">
                       Instructor
