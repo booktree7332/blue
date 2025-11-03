@@ -896,9 +896,13 @@ const Admin = () => {
                     )}
                   </div>
 
-                  <Button onClick={handleCreateAssignment} className="w-full" disabled={submitting}>
+                  <Button 
+                    onClick={handleCreateAssignment} 
+                    className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 font-semibold text-lg py-6" 
+                    disabled={submitting}
+                  >
                     {submitting ? <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                         생성 중...
                       </> : "과제 생성"}
                   </Button>
