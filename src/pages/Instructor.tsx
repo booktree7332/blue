@@ -23,7 +23,8 @@ import {
 import { ArrowLeft, Plus, Trash2, CalendarIcon, Loader2, Upload, FileText, Image, Info } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-
+import { BulkQuestionInput } from "@/components/BulkQuestionInput";
+import { StudentAssignmentManager } from "@/components/StudentAssignmentManager";
 interface QuestionForm {
   text: string;
   options: string[];
@@ -60,7 +61,7 @@ const Instructor = () => {
   const [isResubmittable, setIsResubmittable] = useState(false);
   const [maxAttempts, setMaxAttempts] = useState<number>(1);
   const [questions, setQuestions] = useState<QuestionForm[]>([
-    { text: "", options: ["", "", "", ""], correctAnswer: 0, explanation: "" },
+    { text: "", options: ["1", "2", "3", "4", "5"], correctAnswer: 0, explanation: "" },
   ]);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -115,7 +116,12 @@ const Instructor = () => {
   };
 
   const addQuestion = () => {
-    setQuestions([...questions, { text: "", options: ["", "", "", ""], correctAnswer: 0, explanation: "" }]);
+    setQuestions([...questions, { text: "", options: ["1", "2", "3", "4", "5"], correctAnswer: 0, explanation: "" }]);
+  };
+
+  const addBulkQuestions = (bulkQuestions: QuestionForm[]) => {
+    setQuestions([...questions, ...bulkQuestions]);
+    toast.success(`Added ${bulkQuestions.length} questions`);
   };
 
   const handleFileUpload = async (file: File): Promise<string | null> => {
@@ -276,7 +282,7 @@ const Instructor = () => {
       setIsResubmittable(false);
       setMaxAttempts(1);
       setUploadedFile(null);
-      setQuestions([{ text: "", options: ["", "", "", ""], correctAnswer: 0, explanation: "" }]);
+      setQuestions([{ text: "", options: ["1", "2", "3", "4", "5"], correctAnswer: 0, explanation: "" }]);
       fetchMyAssignments();
     } catch (error: any) {
       toast.error("Failed to create assignment: " + error.message);
@@ -567,6 +573,8 @@ const Instructor = () => {
                       <Plus className="h-4 w-4 mr-2" />
                       Add Question
                     </Button>
+
+                    <BulkQuestionInput onAddQuestions={addBulkQuestions} />
                   </CardContent>
                 </Card>
               </div>
@@ -618,13 +626,19 @@ const Instructor = () => {
                               : "No due date"}
                           </TableCell>
                           <TableCell>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => deleteAssignment(assignment.id)}
-                            >
-                              Delete
-                            </Button>
+                            <div className="flex gap-2">
+                              <StudentAssignmentManager
+                                assignmentId={assignment.id}
+                                assignmentTitle={assignment.title}
+                              />
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => deleteAssignment(assignment.id)}
+                              >
+                                Delete
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}

@@ -72,8 +72,26 @@ const Student = () => {
   }, [user]);
 
   const fetchAssignments = async () => {
+    if (!user) return;
     setLoading(true);
     try {
+      // First fetch the assignment IDs that this student is assigned to
+      const { data: assignedData, error: assignedError } = await supabase
+        .from("student_assignments")
+        .select("assignment_id")
+        .eq("student_id", user.id);
+
+      if (assignedError) throw assignedError;
+
+      const assignedIds = (assignedData || []).map(a => a.assignment_id);
+
+      // If no assignments are assigned, show empty list
+      if (assignedIds.length === 0) {
+        setAssignments([]);
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from("assignments")
         .select(`
@@ -81,6 +99,7 @@ const Student = () => {
           instructor:profiles!instructor_id(full_name),
           submissions!submissions_assignment_id_fkey!left(id, score, total_questions, student_id)
         `)
+        .in("id", assignedIds)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
