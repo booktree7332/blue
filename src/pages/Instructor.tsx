@@ -446,7 +446,7 @@ const Instructor = () => {
               <div className="grid md:grid-cols-2 gap-6">
                 {/* Left - Assignment Details */}
                 <Card className="h-fit">
-                  <CardHeader>
+                  <CardHeader variant="accent">
                     <CardTitle>과제 생성</CardTitle>
                     <CardDescription>과제의 기본 정보를 설정하세요</CardDescription>
                   </CardHeader>
@@ -580,7 +580,7 @@ const Instructor = () => {
 
               {/* Bottom - Questions */}
               <Card>
-                <CardHeader>
+                <CardHeader variant="accent">
                   <CardTitle>문제</CardTitle>
                   <CardDescription>과제에 문제를 추가하고 설정하세요</CardDescription>
                 </CardHeader>
@@ -721,7 +721,7 @@ const Instructor = () => {
 
           <TabsContent value="assignments">
             <Card>
-              <CardHeader>
+              <CardHeader variant="accent">
                 <CardTitle>내 과제</CardTitle>
                 <CardDescription>생성한 과제를 확인하고 관리하세요</CardDescription>
               </CardHeader>
@@ -881,7 +881,7 @@ const Instructor = () => {
 
               {/* Progress Table */}
               <Card>
-                <CardHeader>
+                <CardHeader variant="accent">
                   <CardTitle>학생 진도 현황</CardTitle>
                   <CardDescription>모든 할당된 학생들의 과제별 점수를 확인하세요</CardDescription>
                 </CardHeader>
@@ -970,7 +970,7 @@ const Instructor = () => {
               {/* Bar Chart */}
               {studentProgress.length > 0 && (
               <Card>
-                  <CardHeader>
+                  <CardHeader variant="accent">
                     <CardTitle>학생별 평균 점수</CardTitle>
                     <CardDescription>학생 성과 시각적 비교</CardDescription>
                   </CardHeader>

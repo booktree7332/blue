@@ -571,7 +571,7 @@ const Admin = () => {
 
             <TabsContent value="users" className="space-y-6">
               <Card>
-                <CardHeader>
+                <CardHeader variant="accent">
                   <CardTitle>승인 대기</CardTitle>
                   <CardDescription>
                     신규 사용자 등록 검토 및 승인
@@ -634,7 +634,7 @@ const Admin = () => {
               </Card>
 
               <Card>
-                <CardHeader>
+                <CardHeader variant="accent">
                   <CardTitle>학생</CardTitle>
                   <CardDescription>
                     학생 계정 관리
@@ -678,7 +678,7 @@ const Admin = () => {
               </Card>
 
               <Card>
-                <CardHeader>
+                <CardHeader variant="accent">
                   <CardTitle>강사</CardTitle>
                   <CardDescription>
                     강사 계정 관리
@@ -728,7 +728,7 @@ const Admin = () => {
                 <div className="grid md:grid-cols-2 gap-6">
                   {/* Left - Assignment Details */}
                   <Card className="h-fit">
-                    <CardHeader>
+                    <CardHeader variant="accent">
                       <CardTitle>과제 생성</CardTitle>
                       <CardDescription>과제의 기본 정보를 설정하세요</CardDescription>
                     </CardHeader>
@@ -888,7 +888,7 @@ const Admin = () => {
 
                 {/* Bottom - Questions */}
                 <Card>
-                    <CardHeader>
+                    <CardHeader variant="accent">
                       <CardTitle>문제</CardTitle>
                       <CardDescription>과제에 문제를 추가하고 설정하세요</CardDescription>
                     </CardHeader>
@@ -1029,7 +1029,7 @@ const Admin = () => {
 
             <TabsContent value="assignments">
               <Card>
-                <CardHeader>
+                <CardHeader variant="accent">
                   <CardTitle>전체 과제</CardTitle>
                   <CardDescription>
                     강사가 생성한 과제 보기 및 관리
@@ -1076,7 +1076,7 @@ const Admin = () => {
 
             <TabsContent value="grades">
               <Card>
-                <CardHeader>
+                <CardHeader variant="accent">
                   <CardTitle>전체 제출</CardTitle>
                   <CardDescription>
                     모든 과제에 대한 학생 제출 및 성적 보기
@@ -1157,7 +1157,7 @@ const Admin = () => {
 
                 {/* Per-Assignment Analytics */}
                 <Card>
-                  <CardHeader>
+                  <CardHeader variant="accent">
                     <CardTitle className="flex items-center gap-2">
                       <BarChart3 className="h-5 w-5" />
                       과제별 분석
