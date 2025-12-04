@@ -168,6 +168,35 @@ export type Database = {
           },
         ]
       }
+      student_assignments: {
+        Row: {
+          assigned_at: string
+          assignment_id: string
+          id: string
+          student_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assignment_id: string
+          id?: string
+          student_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assignment_id?: string
+          id?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_assignments_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       submissions: {
         Row: {
           assignment_id: string
