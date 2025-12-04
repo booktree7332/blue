@@ -7,9 +7,21 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
 ));
 Card.displayName = "Card";
 
-const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn("flex flex-col space-y-1.5 p-6", className)} {...props} />
+interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+  variant?: "default" | "accent";
+}
+
+const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
+  ({ className, variant = "default", ...props }, ref) => (
+    <div 
+      ref={ref} 
+      className={cn(
+        "flex flex-col space-y-1.5 p-6",
+        variant === "accent" && "border-l-4 border-accent bg-gradient-to-r from-accent/10 to-transparent",
+        className
+      )} 
+      {...props} 
+    />
   ),
 );
 CardHeader.displayName = "CardHeader";
