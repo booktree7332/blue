@@ -200,19 +200,15 @@ const Admin = () => {
   const approveUser = async (userId: string) => {
     try {
       // Check if user has a role assigned
-      const { data: userRole, error: roleCheckError } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", userId)
-        .maybeSingle();
-
+      const {
+        data: userRole,
+        error: roleCheckError
+      } = await supabase.from("user_roles").select("role").eq("user_id", userId).maybeSingle();
       if (roleCheckError) throw roleCheckError;
-
       if (!userRole) {
         toast.error("이 사용자에게 역할이 할당되지 않았습니다. 역할을 먼저 할당해주세요.");
         return;
       }
-
       const {
         error
       } = await supabase.from("profiles").update({
@@ -225,31 +221,30 @@ const Admin = () => {
       toast.error("사용자 승인 실패: " + error.message);
     }
   };
-
   const assignRole = async (userId: string, role: "student" | "instructor") => {
     try {
       // Check if user already has a role
-      const { data: existingRole } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", userId)
-        .maybeSingle();
-
+      const {
+        data: existingRole
+      } = await supabase.from("user_roles").select("role").eq("user_id", userId).maybeSingle();
       if (existingRole) {
         // Update existing role
-        const { error } = await supabase
-          .from("user_roles")
-          .update({ role })
-          .eq("user_id", userId);
+        const {
+          error
+        } = await supabase.from("user_roles").update({
+          role
+        }).eq("user_id", userId);
         if (error) throw error;
       } else {
         // Insert new role
-        const { error } = await supabase
-          .from("user_roles")
-          .insert({ user_id: userId, role });
+        const {
+          error
+        } = await supabase.from("user_roles").insert({
+          user_id: userId,
+          role
+        });
         if (error) throw error;
       }
-
       toast.success("역할 할당 완료");
       fetchUsers();
     } catch (error: any) {
@@ -327,7 +322,6 @@ const Admin = () => {
     }
     return null;
   };
-
   const addQuestion = () => {
     setQuestions([...questions, {
       text: "",
@@ -426,7 +420,6 @@ const Admin = () => {
         }
         fileType = getFileType(uploadedFile.type);
       }
-
       const {
         data: assignment,
         error: assignmentError
@@ -438,7 +431,7 @@ const Admin = () => {
         file_url: fileUrl,
         file_type: fileType,
         is_resubmittable: isResubmittable,
-        max_attempts: isResubmittable ? maxAttempts : null,
+        max_attempts: isResubmittable ? maxAttempts : null
       }).select().single();
       if (assignmentError) throw assignmentError;
       const questionsToInsert = questions.map((q, index) => ({
@@ -458,12 +451,13 @@ const Admin = () => {
       if (selectedStudentIds.length > 0) {
         const studentAssignments = selectedStudentIds.map(studentId => ({
           assignment_id: assignment.id,
-          student_id: studentId,
+          student_id: studentId
         }));
-        const { error: saError } = await supabase.from("student_assignments").insert(studentAssignments);
+        const {
+          error: saError
+        } = await supabase.from("student_assignments").insert(studentAssignments);
         if (saError) throw saError;
       }
-
       toast.success("과제 생성 완료!");
       setSelectedInstructor("");
       setAssignmentTitle("");
@@ -505,9 +499,11 @@ const Admin = () => {
     const scores = completedSubmissions.map(s => s.score !== null ? Math.round(s.score / s.total_questions * 100) : 0);
     const totalStudents = students.length;
     const averageScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
-    
+
     // Create histogram bins for score distribution
-    const scoreDistribution: { [key: string]: number } = {
+    const scoreDistribution: {
+      [key: string]: number;
+    } = {
       '0-9': 0,
       '10-19': 0,
       '20-29': 0,
@@ -519,26 +515,14 @@ const Admin = () => {
       '80-89': 0,
       '90-100': 0
     };
-    
     scores.forEach(score => {
-      if (score < 10) scoreDistribution['0-9']++;
-      else if (score < 20) scoreDistribution['10-19']++;
-      else if (score < 30) scoreDistribution['20-29']++;
-      else if (score < 40) scoreDistribution['30-39']++;
-      else if (score < 50) scoreDistribution['40-49']++;
-      else if (score < 60) scoreDistribution['50-59']++;
-      else if (score < 70) scoreDistribution['60-69']++;
-      else if (score < 80) scoreDistribution['70-79']++;
-      else if (score < 90) scoreDistribution['80-89']++;
-      else scoreDistribution['90-100']++;
+      if (score < 10) scoreDistribution['0-9']++;else if (score < 20) scoreDistribution['10-19']++;else if (score < 30) scoreDistribution['20-29']++;else if (score < 40) scoreDistribution['30-39']++;else if (score < 50) scoreDistribution['40-49']++;else if (score < 60) scoreDistribution['50-59']++;else if (score < 70) scoreDistribution['60-69']++;else if (score < 80) scoreDistribution['70-79']++;else if (score < 90) scoreDistribution['80-89']++;else scoreDistribution['90-100']++;
     });
-    
     const chartData = Object.entries(scoreDistribution).map(([range, count]) => ({
       range,
       count,
       percentage: completedSubmissions.length > 0 ? Math.round(count / completedSubmissions.length * 100) : 0
     }));
-    
     const uniqueStudents = new Set(assignmentSubmissions.map(s => s.student_id)).size;
     return {
       totalSubmissions: assignmentSubmissions.length,
@@ -611,10 +595,9 @@ const Admin = () => {
                             </TableCell>
                             <TableCell>{user.email || "N/A"}</TableCell>
                             <TableCell>
-                              {user.role === "No role assigned" ? (
-                                <div className="flex items-center gap-2">
+                              {user.role === "No role assigned" ? <div className="flex items-center gap-2">
                                   <span className="text-destructive font-semibold">{user.role}</span>
-                                  <Select onValueChange={(role) => assignRole(user.id, role as "student" | "instructor")}>
+                                  <Select onValueChange={role => assignRole(user.id, role as "student" | "instructor")}>
                                     <SelectTrigger className="w-32">
                                       <SelectValue placeholder="역할 선택" />
                                     </SelectTrigger>
@@ -623,10 +606,7 @@ const Admin = () => {
                                       <SelectItem value="instructor">Instructor</SelectItem>
                                     </SelectContent>
                                   </Select>
-                                </div>
-                              ) : (
-                                user.role
-                              )}
+                                </div> : user.role}
                             </TableCell>
                             <TableCell>
                               {new Date(user.created_at).toLocaleDateString()}
@@ -746,7 +726,7 @@ const Admin = () => {
                       <CardTitle>과제 생성</CardTitle>
                       <CardDescription>과제의 기본 정보를 설정하세요</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-6">
+                    <CardContent className="space-y-6 mt-2.5">
                       <div className="space-y-2">
                         <Label>강사 선택</Label>
                         <Select value={selectedInstructor} onValueChange={setSelectedInstructor}>
@@ -754,58 +734,34 @@ const Admin = () => {
                             <SelectValue placeholder="강사를 선택하세요" />
                           </SelectTrigger>
                           <SelectContent>
-                            {instructorsList.map(instructor => (
-                              <SelectItem key={instructor.id} value={instructor.id}>
+                            {instructorsList.map(instructor => <SelectItem key={instructor.id} value={instructor.id}>
                                 {instructor.full_name}
-                              </SelectItem>
-                            ))}
+                              </SelectItem>)}
                           </SelectContent>
                         </Select>
                       </div>
 
                       <div className="space-y-2">
                         <Label htmlFor="title">과제 제목</Label>
-                        <Input
-                          id="title"
-                          placeholder="과제 제목을 입력하세요"
-                          value={assignmentTitle}
-                          onChange={(e) => setAssignmentTitle(e.target.value)}
-                        />
+                        <Input id="title" placeholder="과제 제목을 입력하세요" value={assignmentTitle} onChange={e => setAssignmentTitle(e.target.value)} />
                       </div>
 
                       <div className="space-y-2">
                         <Label htmlFor="description">설명 (선택사항)</Label>
-                        <Input
-                          id="description"
-                          placeholder="과제 설명을 입력하세요"
-                          value={description}
-                          onChange={(e) => setDescription(e.target.value)}
-                        />
+                        <Input id="description" placeholder="과제 설명을 입력하세요" value={description} onChange={e => setDescription(e.target.value)} />
                       </div>
 
                       <div className="space-y-2">
                         <Label>마감일 (선택사항)</Label>
                         <Popover>
                           <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "w-full justify-start text-left font-normal",
-                                !dueDate && "text-muted-foreground"
-                              )}
-                            >
+                            <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !dueDate && "text-muted-foreground")}>
                               <CalendarIcon className="mr-2 h-4 w-4" />
                               {dueDate ? format(dueDate, "PPP") : "날짜 선택"}
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={dueDate}
-                              onSelect={setDueDate}
-                              initialFocus
-                              className="pointer-events-auto"
-                            />
+                            <Calendar mode="single" selected={dueDate} onSelect={setDueDate} initialFocus className="pointer-events-auto" />
                           </PopoverContent>
                         </Popover>
                       </div>
@@ -813,28 +769,16 @@ const Admin = () => {
                       <div className="space-y-2">
                         <Label htmlFor="file">파일 업로드 (선택사항)</Label>
                         <div className="flex gap-2 items-center">
-                          <Input
-                            id="file"
-                            type="file"
-                            accept="image/*,.pdf"
-                            onChange={async (e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                setUploadedFile(file);
-                              }
-                            }}
-                            disabled={uploading}
-                          />
-                          {uploadedFile && (
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              {uploadedFile.type.startsWith('image/') ? (
-                                <Image className="h-4 w-4" />
-                              ) : (
-                                <FileText className="h-4 w-4" />
-                              )}
+                          <Input id="file" type="file" accept="image/*,.pdf" onChange={async e => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setUploadedFile(file);
+                        }
+                      }} disabled={uploading} />
+                          {uploadedFile && <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              {uploadedFile.type.startsWith('image/') ? <Image className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
                               <span>{uploadedFile.name}</span>
-                            </div>
-                          )}
+                            </div>}
                         </div>
                         <p className="text-xs text-muted-foreground">
                           이 과제에 첨부할 이미지 또는 PDF 파일을 업로드하세요
@@ -843,67 +787,45 @@ const Admin = () => {
 
                       <div className="space-y-4 border-t pt-4">
                         <div className="flex items-center space-x-2">
-                          <Checkbox 
-                            id="resubmittable"
-                            checked={isResubmittable}
-                            onCheckedChange={(checked) => setIsResubmittable(checked as boolean)}
-                          />
+                          <Checkbox id="resubmittable" checked={isResubmittable} onCheckedChange={checked => setIsResubmittable(checked as boolean)} />
                           <Label htmlFor="resubmittable" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                             학생들이 이 과제를 재제출할 수 있도록 허용
                           </Label>
                         </div>
                         
-                        {isResubmittable && (
-                          <div className="space-y-2 pl-6">
+                        {isResubmittable && <div className="space-y-2 pl-6">
                             <Label htmlFor="maxAttempts">최대 시도 횟수</Label>
-                            <Input
-                              id="maxAttempts"
-                              type="number"
-                              min="1"
-                              value={maxAttempts}
-                              onChange={(e) => setMaxAttempts(Math.max(1, parseInt(e.target.value) || 1))}
-                              placeholder="시도 횟수를 입력하세요"
-                            />
+                            <Input id="maxAttempts" type="number" min="1" value={maxAttempts} onChange={e => setMaxAttempts(Math.max(1, parseInt(e.target.value) || 1))} placeholder="시도 횟수를 입력하세요" />
                             <p className="text-xs text-muted-foreground">
                               학생들은 이 과제를 최대 {maxAttempts}회까지 제출할 수 있습니다
                             </p>
-                          </div>
-                        )}
+                          </div>}
                       </div>
 
                       <Button onClick={handleCreateAssignment} className="w-full" disabled={submitting}>
-                        {submitting ? (
-                          <>
+                        {submitting ? <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                             생성 중...
-                          </>
-                        ) : (
-                          "과제 생성"
-                        )}
+                          </> : "과제 생성"}
                       </Button>
                     </CardContent>
                   </Card>
 
                   {/* Column 2 - Bulk Question Input */}
                   <div className="h-fit">
-                    <BulkQuestionInput 
-                      onAddQuestions={(newQuestions) => {
-                        setQuestions(prev => {
-                          const hasContent = prev.length > 0 && (prev[0].text || prev[0].options.some(o => o));
-                          if (hasContent) {
-                            return [...prev, ...newQuestions];
-                          }
-                          return newQuestions;
-                        });
-                      }}
-                    />
+                    <BulkQuestionInput onAddQuestions={newQuestions => {
+                  setQuestions(prev => {
+                    const hasContent = prev.length > 0 && (prev[0].text || prev[0].options.some(o => o));
+                    if (hasContent) {
+                      return [...prev, ...newQuestions];
+                    }
+                    return newQuestions;
+                  });
+                }} />
                   </div>
 
                   {/* Column 3 - Student Selector */}
-                  <StudentSelector
-                    selectedStudentIds={selectedStudentIds}
-                    onSelectionChange={setSelectedStudentIds}
-                  />
+                  <StudentSelector selectedStudentIds={selectedStudentIds} onSelectionChange={setSelectedStudentIds} />
                 </div>
 
                 {/* Bottom - Questions */}
@@ -915,52 +837,29 @@ const Admin = () => {
                     <CardContent className="space-y-6">
                       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 mt-2">
                         {questions.map((question, qIndex) => {
-                          const hasContent = question.text || question.options.some(o => o);
-                          return (
-                            <div
-                              key={qIndex}
-                              onClick={() => {
-                                const element = document.getElementById(`admin-question-form-${qIndex}`);
-                                element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                              }}
-                              className={cn(
-                                "group relative aspect-square rounded-xl cursor-pointer",
-                                "border-2 transition-all duration-300 ease-out",
-                                "hover:scale-105 hover:shadow-lg hover:-translate-y-1",
-                                hasContent 
-                                  ? "bg-gradient-to-br from-accent/20 to-accent/5 border-accent/40 hover:border-accent hover:shadow-accent/20" 
-                                  : "bg-gradient-to-br from-muted/50 to-muted/20 border-border hover:border-accent/60"
-                              )}
-                            >
+                    const hasContent = question.text || question.options.some(o => o);
+                    return <div key={qIndex} onClick={() => {
+                      const element = document.getElementById(`admin-question-form-${qIndex}`);
+                      element?.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                      });
+                    }} className={cn("group relative aspect-square rounded-xl cursor-pointer", "border-2 transition-all duration-300 ease-out", "hover:scale-105 hover:shadow-lg hover:-translate-y-1", hasContent ? "bg-gradient-to-br from-accent/20 to-accent/5 border-accent/40 hover:border-accent hover:shadow-accent/20" : "bg-gradient-to-br from-muted/50 to-muted/20 border-border hover:border-accent/60")}>
                               <div className="absolute inset-0 flex flex-col items-center justify-center p-3">
-                                <div className={cn(
-                                  "w-10 h-10 rounded-full flex items-center justify-center mb-2",
-                                  "text-lg font-bold transition-colors duration-300",
-                                  hasContent 
-                                    ? "bg-accent/30 text-accent-foreground group-hover:bg-accent/50" 
-                                    : "bg-muted text-muted-foreground group-hover:bg-accent/20"
-                                )}>
+                                <div className={cn("w-10 h-10 rounded-full flex items-center justify-center mb-2", "text-lg font-bold transition-colors duration-300", hasContent ? "bg-accent/30 text-accent-foreground group-hover:bg-accent/50" : "bg-muted text-muted-foreground group-hover:bg-accent/20")}>
                                   {qIndex + 1}
                                 </div>
-                                {question.text ? (
-                                  <p className="text-xs text-center text-muted-foreground line-clamp-2 px-1">
+                                {question.text ? <p className="text-xs text-center text-muted-foreground line-clamp-2 px-1">
                                     {question.text}
-                                  </p>
-                                ) : (
-                                  <p className="text-xs text-muted-foreground/60 italic">빈 문제</p>
-                                )}
+                                  </p> : <p className="text-xs text-muted-foreground/60 italic">빈 문제</p>}
                               </div>
-                              {hasContent && (
-                                <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                              )}
-                            </div>
-                          );
-                        })}
+                              {hasContent && <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-green-500 animate-pulse" />}
+                            </div>;
+                  })}
                       </div>
 
                       <div className="space-y-6">
-                        {questions.map((question, qIndex) => (
-                          <Card key={qIndex} id={`admin-question-form-${qIndex}`} className="border-2 border-accent/30 hover:border-accent/50 transition-colors">
+                        {questions.map((question, qIndex) => <Card key={qIndex} id={`admin-question-form-${qIndex}`} className="border-2 border-accent/30 hover:border-accent/50 transition-colors">
                             <CardHeader className="bg-gradient-to-r from-accent/10 to-transparent">
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
@@ -969,27 +868,16 @@ const Admin = () => {
                                   </div>
                                   <CardTitle>문제 {qIndex + 1}</CardTitle>
                                 </div>
-                                {questions.length > 1 && (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                    onClick={() => removeQuestion(qIndex)}
-                                  >
+                                {questions.length > 1 && <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => removeQuestion(qIndex)}>
                                     <Trash2 className="h-4 w-4 mr-2" />
                                     삭제
-                                  </Button>
-                                )}
+                                  </Button>}
                               </div>
                             </CardHeader>
                             <CardContent className="space-y-4">
                               <div className="space-y-2">
                                 <Label>문제 텍스트</Label>
-                                <Input
-                                  placeholder="문제 텍스트를 입력하세요"
-                                  value={question.text}
-                                  onChange={(e) => updateQuestion(qIndex, "text", e.target.value)}
-                                />
+                                <Input placeholder="문제 텍스트를 입력하세요" value={question.text} onChange={e => updateQuestion(qIndex, "text", e.target.value)} />
                               </div>
 
                               <div className="space-y-3">
@@ -999,49 +887,25 @@ const Admin = () => {
                                     라디오 버튼을 클릭하여 정답을 표시하세요
                                   </Label>
                                 </div>
-                                <RadioGroup
-                                  value={question.correctAnswer.toString()}
-                                  onValueChange={(value) =>
-                                    updateQuestion(qIndex, "correctAnswer", parseInt(value))
-                                  }
-                                >
-                                  {question.options.map((option, oIndex) => (
-                                    <div key={oIndex} className="flex items-center gap-2">
-                                      <RadioGroupItem
-                                        value={oIndex.toString()}
-                                        id={`admin-q${qIndex}-o${oIndex}`}
-                                        className="shrink-0"
-                                      />
+                                <RadioGroup value={question.correctAnswer.toString()} onValueChange={value => updateQuestion(qIndex, "correctAnswer", parseInt(value))}>
+                                  {question.options.map((option, oIndex) => <div key={oIndex} className="flex items-center gap-2">
+                                      <RadioGroupItem value={oIndex.toString()} id={`admin-q${qIndex}-o${oIndex}`} className="shrink-0" />
                                       <div className="flex-1">
-                                        <Input
-                                          placeholder={`선택지 ${oIndex + 1}`}
-                                          value={option}
-                                          onChange={(e) => updateOption(qIndex, oIndex, e.target.value)}
-                                        />
+                                        <Input placeholder={`선택지 ${oIndex + 1}`} value={option} onChange={e => updateOption(qIndex, oIndex, e.target.value)} />
                                       </div>
-                                      {question.correctAnswer === oIndex && (
-                                        <span className="text-xs text-green-600 dark:text-green-400 font-medium shrink-0">
+                                      {question.correctAnswer === oIndex && <span className="text-xs text-green-600 dark:text-green-400 font-medium shrink-0">
                                           ✓ 정답
-                                        </span>
-                                      )}
-                                    </div>
-                                  ))}
+                                        </span>}
+                                    </div>)}
                                 </RadioGroup>
                               </div>
 
                               <div className="space-y-2">
                                 <Label htmlFor={`admin-explanation-${qIndex}`}>설명 (선택사항)</Label>
-                                <Textarea
-                                  id={`admin-explanation-${qIndex}`}
-                                  placeholder="이 정답이 맞는 이유를 설명하세요..."
-                                  value={question.explanation}
-                                  onChange={(e) => updateQuestion(qIndex, "explanation", e.target.value)}
-                                  rows={3}
-                                />
+                                <Textarea id={`admin-explanation-${qIndex}`} placeholder="이 정답이 맞는 이유를 설명하세요..." value={question.explanation} onChange={e => updateQuestion(qIndex, "explanation", e.target.value)} rows={3} />
                               </div>
                             </CardContent>
-                          </Card>
-                        ))}
+                          </Card>)}
                       </div>
 
                       <Button onClick={addQuestion} variant="outline" className="w-full">
@@ -1225,39 +1089,30 @@ const Admin = () => {
 
                                 <div className="space-y-4">
                                   <h4 className="text-sm font-medium">점수 분포</h4>
-                                  <ChartContainer
-                                    config={{
-                                      count: {
-                                        label: "학생 수",
-                                        color: "hsl(var(--chart-1))",
-                                      },
-                                    }}
-                                    className="h-[300px] w-full"
-                                  >
+                                  <ChartContainer config={{
+                            count: {
+                              label: "학생 수",
+                              color: "hsl(var(--chart-1))"
+                            }
+                          }} className="h-[300px] w-full">
                                     <ResponsiveContainer width="100%" height="100%">
                                       <BarChart data={stats.scoreDistribution}>
                                         <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                                        <XAxis 
-                                          dataKey="range" 
-                                          className="text-xs"
-                                          label={{ value: '점수 구간', position: 'insideBottom', offset: -5 }}
-                                        />
-                                        <YAxis 
-                                          className="text-xs"
-                                          label={{ value: '학생 수', angle: -90, position: 'insideLeft' }}
-                                        />
-                                        <ChartTooltip
-                                          content={<ChartTooltipContent />}
-                                          formatter={(value: number) => {
-                                            const item = stats.scoreDistribution.find(d => d.count === value);
-                                            return [`${value}명 (${item?.percentage || 0}%)`, "학생 수"];
-                                          }}
-                                        />
-                                        <Bar 
-                                          dataKey="count" 
-                                          fill="hsl(var(--data-viz))"
-                                          radius={[4, 4, 0, 0]}
-                                        />
+                                        <XAxis dataKey="range" className="text-xs" label={{
+                                  value: '점수 구간',
+                                  position: 'insideBottom',
+                                  offset: -5
+                                }} />
+                                        <YAxis className="text-xs" label={{
+                                  value: '학생 수',
+                                  angle: -90,
+                                  position: 'insideLeft'
+                                }} />
+                                        <ChartTooltip content={<ChartTooltipContent />} formatter={(value: number) => {
+                                  const item = stats.scoreDistribution.find(d => d.count === value);
+                                  return [`${value}명 (${item?.percentage || 0}%)`, "학생 수"];
+                                }} />
+                                        <Bar dataKey="count" fill="hsl(var(--data-viz))" radius={[4, 4, 0, 0]} />
                                       </BarChart>
                                     </ResponsiveContainer>
                                   </ChartContainer>
