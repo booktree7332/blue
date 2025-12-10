@@ -253,11 +253,14 @@ const Admin = () => {
   };
   const rejectUser = async (userId: string) => {
     try {
-      const {
-        error
-      } = await supabase.from("profiles").delete().eq("id", userId);
+      // Delete user role first (if exists)
+      await supabase.from("user_roles").delete().eq("user_id", userId);
+      
+      // Delete profile
+      const { error } = await supabase.from("profiles").delete().eq("id", userId);
       if (error) throw error;
-      toast.success("사용자 거부 완료");
+      
+      toast.success("사용자 거부 완료 - 대기 목록에서 삭제됨");
       fetchUsers();
     } catch (error: any) {
       toast.error("사용자 거부 실패: " + error.message);
